@@ -134,6 +134,7 @@ let color = '#1b1a19';
 let penWidth = 5;
 let eraserWidth = 26;
 let selected = null;
+let groupSelection = [];   // 投げ縄で選んだ複数オブジェクト
 let tainted = false;       // CORS画像を読み込んだらtrue（PNG保存不可）
 
 /* ---------- 座標変換 ---------- */
@@ -158,6 +159,37 @@ function strokeBBox(s) {
   return { x: x0 - m, y: y0 - m, w: x1 - x0 + m * 2, h: y1 - y0 + m * 2 };
 }
 const itemBBox = it => it.type === 'image' ? { x: it.x, y: it.y, w: it.w, h: it.h } : strokeBBox(it);
+function unionBBox(its) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const it of its) {
+    const b = itemBBox(it);
+    x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+    x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+  }
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+function pointInPolygon(pt, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
+    const hit = ((yi > pt.y) !== (yj > pt.y)) &&
+      (pt.x < (xj - xi) * (pt.y - yi) / (yj - yi) + xi);
+    if (hit) inside = !inside;
+  }
+  return inside;
+}
+/* オブジェクトの一部でも投げ縄の内側に入っていれば選択対象とする */
+function itemInLasso(it, poly) {
+  if (it.type === 'image') {
+    const b = itemBBox(it);
+    return [
+      { x: b.x, y: b.y }, { x: b.x + b.w, y: b.y },
+      { x: b.x, y: b.y + b.h }, { x: b.x + b.w, y: b.y + b.h },
+      { x: b.x + b.w / 2, y: b.y + b.h / 2 }
+    ].some(p => pointInPolygon(p, poly));
+  }
+  return it.points.some(p => pointInPolygon(p, poly));
+}
 
 function drawStroke(g, s) {
   g.strokeStyle = s.color;
@@ -213,6 +245,22 @@ function renderScene(g, view, list, opts = {}) {
       }
     }
   }
+  if (opts.ui && groupSelection.length) {
+    const b = unionBBox(groupSelection), s = view.scale;
+    g.strokeStyle = '#2f6feb'; g.lineWidth = 1.5 / s;
+    g.setLineDash([5 / s, 4 / s]);
+    g.strokeRect(b.x, b.y, b.w, b.h);
+    g.setLineDash([]);
+  }
+  if (opts.lasso && opts.lasso.length > 1) {
+    g.strokeStyle = '#2f6feb'; g.lineWidth = 1.5 / view.scale;
+    g.setLineDash([6 / view.scale, 4 / view.scale]);
+    g.beginPath();
+    g.moveTo(opts.lasso[0].x, opts.lasso[0].y);
+    for (let i = 1; i < opts.lasso.length; i++) g.lineTo(opts.lasso[i].x, opts.lasso[i].y);
+    g.stroke();
+    g.setLineDash([]);
+  }
   g.restore();
 }
 const corners = b => [[b.x, b.y], [b.x + b.w, b.y], [b.x, b.y + b.h], [b.x + b.w, b.y + b.h]];
@@ -222,13 +270,16 @@ function frame() {
     needsDraw = false;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const list = live ? items.concat([live]) : items;
-    renderScene(ctx, cam, list, { w: W, h: H, grid: true, ui: true });
+    renderScene(ctx, cam, list, { w: W, h: H, grid: true, ui: true, lasso: mode === 'lasso' ? lassoPts : null });
   }
   requestAnimationFrame(frame);
 }
 
 /* ---------- 履歴 ---------- */
-function snapshot() { undoStack.push(items.slice()); if (undoStack.length > 100) undoStack.shift(); redoStack.length = 0; syncHistory(); }
+// 移動・リサイズ・色変更はオブジェクトを直接書き換えるため、
+// 単なる配列の浅いコピーでは履歴に残せない。ポイントまで複製する
+const cloneItem = it => it.type === 'image' ? { ...it } : { ...it, points: it.points.map(p => ({ ...p })) };
+function snapshot() { undoStack.push(items.map(cloneItem)); if (undoStack.length > 100) undoStack.shift(); redoStack.length = 0; syncHistory(); }
 function undo() {
   // 補正直後の1回目は、消すのではなく手描きの線に戻す
   if (lastBeautified && items[items.length - 1] === lastBeautified.shape) {
@@ -236,9 +287,9 @@ function undo() {
     lastBeautified = null; invalidate(); return;
   }
   if (!undoStack.length) return;
-  redoStack.push(items.slice()); items = undoStack.pop(); selected = null; syncHistory(); invalidate();
+  redoStack.push(items.map(cloneItem)); items = undoStack.pop(); selected = null; groupSelection = []; syncHistory(); invalidate();
 }
-function redo() { if (!redoStack.length) return; undoStack.push(items.slice()); items = redoStack.pop(); selected = null; syncHistory(); invalidate(); }
+function redo() { if (!redoStack.length) return; undoStack.push(items.map(cloneItem)); items = redoStack.pop(); selected = null; groupSelection = []; syncHistory(); invalidate(); }
 function syncHistory() {
   document.getElementById('undo').disabled = !undoStack.length;
   document.getElementById('redo').disabled = !redoStack.length;
@@ -246,8 +297,9 @@ function syncHistory() {
 
 /* ---------- 入力 ---------- */
 let live = null;            // 描画中のストローク
-let mode = null;            // 'draw' | 'pan' | 'move' | 'resize' | 'erase'
+let mode = null;            // 'draw' | 'pan' | 'move' | 'moveGroup' | 'resize' | 'erase' | 'lasso'
 let start = null, origin = null, spaceDown = false, resizeHandle = -1;
+let lassoPts = null;        // 投げ縄選択の軌跡（ワールド座標）
 
 let autoPenNoticed = false;
 
@@ -256,10 +308,23 @@ const pressureOf = e => (e.pointerType === 'pen' && e.pressure > 0) ? e.pressure
 
 /* 選択中のオブジェクト（とそのハンドル）の上にいるか */
 function overSelection(w) {
-  if (!selected) return false;
-  const b = itemBBox(selected), tol = 12 / cam.scale;
+  const tol = 12 / cam.scale;
+  const b = groupSelection.length ? unionBBox(groupSelection) : selected ? itemBBox(selected) : null;
+  if (!b) return false;
   return w.x >= b.x - tol && w.x <= b.x + b.w + tol
       && w.y >= b.y - tol && w.y <= b.y + b.h + tol;
+}
+
+/* 投げ縄選択を確定する。範囲内のオブジェクトを選択し、選択ツールに切り替える */
+function finishLasso() {
+  if (lassoPts && lassoPts.length > 2) {
+    const picked = items.filter(it => itemInLasso(it, lassoPts));
+    selected = picked.length === 1 ? picked[0] : null;
+    groupSelection = picked.length > 1 ? picked : [];
+    if (picked.length) setTool('select');
+  }
+  lassoPts = null;
+  invalidate();
 }
 
 canvas.addEventListener('pointerdown', e => {
@@ -267,6 +332,11 @@ canvas.addEventListener('pointerdown', e => {
   const w = toWorld(e.offsetX, e.offsetY);
   start = { sx: e.offsetX, sy: e.offsetY, ...w };
   origin = { x: cam.x, y: cam.y };
+
+  // 右ドラッグ（ペンならバレルボタン）＝投げ縄で範囲選択。他の操作より優先する
+  if (e.button === 2) {
+    mode = 'lasso'; lassoPts = [w]; invalidate(); return;
+  }
 
   // ペン先が触れたら自動でペンに切り替える。
   // ただし消しゴムを明示的に選んでいるとき、ペンの尻尾、手のひらツール、
@@ -286,6 +356,10 @@ canvas.addEventListener('pointerdown', e => {
   }
 
   if (tool === 'select') {
+    if (groupSelection.length) {
+      if (overSelection(w)) { mode = 'moveGroup'; snapshot(); dragStart = { ...w }; invalidate(); return; }
+      groupSelection = [];   // 範囲外のクリックはグループ選択を解除して通常の選択に戻す
+    }
     if (selected && selected.type === 'image') {
       const b = itemBBox(selected), tol = 12 / cam.scale;
       resizeHandle = corners(b).findIndex(([hx, hy]) => Math.abs(w.x - hx) < tol && Math.abs(w.y - hy) < tol);
@@ -317,6 +391,22 @@ function handleMove(e) {
     invalidate(); return;
   }
   if (mode === 'erase') { for (const ev of evts) eraseAt(toWorld(ev.offsetX, ev.offsetY)); return; }
+
+  if (mode === 'lasso') {
+    for (const ev of evts) lassoPts.push(toWorld(ev.offsetX, ev.offsetY));
+    invalidate(); return;
+  }
+
+  if (mode === 'moveGroup') {
+    const w = toWorld(e.offsetX, e.offsetY);
+    const dx = w.x - dragStart.x, dy = w.y - dragStart.y;
+    dragStart = w;
+    for (const it of groupSelection) {
+      if (it.type === 'image') { it.x += dx; it.y += dy; }
+      else for (const p of it.points) { p.x += dx; p.y += dy; }
+    }
+    invalidate(); return;
+  }
 
   if (mode === 'move') {
     const w = toWorld(e.offsetX, e.offsetY);
@@ -380,6 +470,8 @@ function endPointer() {
       }
     }
     items.push(out);
+  } else if (mode === 'lasso') {
+    finishLasso();
   }
   live = null; mode = null; resizeHandle = -1;
   document.body.classList.remove('panning', 'erasing');
@@ -420,6 +512,7 @@ function eraseAt(w) {
     if (nearStroke(it, w, Math.max(it.width / 2, tol))) {
       if (!erasedThisStroke) { snapshot(); erasedThisStroke = true; }
       items.splice(i, 1); if (selected === it) selected = null;
+      if (groupSelection.includes(it)) groupSelection = groupSelection.filter(x => x !== it);
       invalidate(); break;
     }
   }
@@ -738,6 +831,7 @@ document.getElementById('custom').oninput = e => setColor(e.target.value, null);
 document.querySelectorAll('#tools [data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
 function setTool(t) {
   tool = t; selected = t === 'select' ? selected : null;
+  groupSelection = t === 'select' ? groupSelection : [];
   document.querySelectorAll('#tools [data-tool]').forEach(b =>
     b.setAttribute('aria-pressed', String(b.dataset.tool === t)));
   document.body.dataset.tool = t;
@@ -799,7 +893,7 @@ document.getElementById('redo').onclick = redo;
 document.getElementById('save').onclick = savePNG;
 document.getElementById('clear').onclick = () => {
   if (!items.length) return;
-  snapshot(); items = []; selected = null; tainted = false; invalidate();
+  snapshot(); items = []; selected = null; groupSelection = []; tainted = false; invalidate();
 };
 document.getElementById('zoomIn').onclick = () => applyZoom(W / 2, H / 2, cam.scale + 0.1);
 document.getElementById('zoomOut').onclick = () => applyZoom(W / 2, H / 2, cam.scale - 0.1);
@@ -815,6 +909,7 @@ document.getElementById('help').onclick = () => toast(
   '<b>Shift</b>＋ドラッグで直線（<b>Alt</b>併用で45度スナップ）／画像は <b>Ctrl+V</b> で貼り付け、ブラウザからは直接ドロップ<br>' +
   'ホイールで拡大縮小、<b>Shift</b>＋ホイールでスクロール、<b>Space</b>＋ドラッグで画面移動<br>' +
   'ペンで書き始めると自動でペンに戻ります／ペンの尻尾はそのまま消しゴムになります<br>' +
+  '右ドラッグ（ペンはバレルボタン）で投げ縄選択、複数選んだものはまとめて移動できます<br>' +
   'ツールバー右端のボタンを押すと、丸・長方形・正多角形だけを自動できれいな形に補正します（初期状態はオフ）', 8000);
 
 window.addEventListener('keydown', e => {
@@ -825,8 +920,11 @@ window.addEventListener('keydown', e => {
   else if (ctrl && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
   else if (ctrl && e.key === '0') { e.preventDefault(); document.getElementById('zoomReset').click(); }
   else if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); savePNG(); }
-  else if (!ctrl && (e.key === 'Delete' || e.key === 'Backspace') && selected) {
-    snapshot(); items = items.filter(i => i !== selected); selected = null; invalidate();
+  else if (!ctrl && (e.key === 'Delete' || e.key === 'Backspace') && (selected || groupSelection.length)) {
+    snapshot();
+    if (groupSelection.length) { items = items.filter(i => !groupSelection.includes(i)); groupSelection = []; }
+    else { items = items.filter(i => i !== selected); selected = null; }
+    invalidate();
   }
   else if (!ctrl && 'pP'.includes(e.key)) setTool('pen');
   else if (!ctrl && 'eE'.includes(e.key)) setTool('eraser');
