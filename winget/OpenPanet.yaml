@@ -1,0 +1,17 @@
+PackageIdentifier: YutoNiki.OpenPanet
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: Yuto Niki
+PackageName: OpenPanet
+License: MIT
+ShortDescription: A simple, open-source whiteboard app with pressure-sensitive pen input and image pasting
+InstallerType: nullsoft
+InstallerSwitches:
+  Silent: "/S"
+  SilentWithProgress: "/S"
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/YutoNiki/OpenPanet/releases/download/v1.2.0/OpenPanet.Setup.1.2.0.exe
+    InstallerSha256: 26BA48887F72032B13EF5B319E19D5086CA8444B58A0D3AA101F5379A6C2E30C
+ManifestType: singleton
+ManifestVersion: 1.6.0

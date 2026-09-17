@@ -1,10 +1,39 @@
+<p align="center">
+  <img src="icon-256.png" width="120" alt="OpenPanet icon">
+</p>
+
+<p align="center">
+  <a href="https://github.com/YutoNiki/OpenPanet/stargazers"><img src="https://img.shields.io/github/stars/YutoNiki/OpenPanet" alt="GitHub Repo stars"></a>
+  <a href="https://github.com/YutoNiki/OpenPanet/network/members"><img src="https://img.shields.io/github/forks/YutoNiki/OpenPanet" alt="GitHub forks"></a>
+  <a href="https://github.com/YutoNiki/OpenPanet/blob/master/LICENSE"><img src="https://img.shields.io/github/license/YutoNiki/OpenPanet" alt="License"></a>
+</p>
+
 # OpenPanet
+
+<p align="center">
+  <a href="https://github.com/YutoNiki/OpenPanet/releases/latest"><img src="https://img.shields.io/github/v/release/YutoNiki/OpenPanet" alt="Latest release"></a>
+  <a href="https://github.com/YutoNiki/OpenPanet/commits/master"><img src="https://img.shields.io/github/commits-since/YutoNiki/OpenPanet/latest" alt="Commits since last release"></a>
+  <a href="https://github.com/YutoNiki/OpenPanet/graphs/contributors"><img src="https://img.shields.io/github/contributors/YutoNiki/OpenPanet" alt="Contributors"></a>
+  <a href="https://github.com/YutoNiki/OpenPanet/releases"><img src="https://img.shields.io/github/downloads/YutoNiki/OpenPanet/total" alt="Downloads"></a>
+</p>
 
 A free, open-source whiteboard app, started as a response to Microsoft Whiteboard's retirement. The name blends "Pane" (a window pane) with the sound of "paint".
 
 `whiteboard.html` runs standalone — drag it into Edge/Chrome first to try it out.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
+## Installing on Windows
+
+Grab the installer or the portable build from [Releases](https://github.com/YutoNiki/OpenPanet/releases/latest).
+
+Alternatively, install straight from the command line via winget and the manifest in this repo (no submission to the winget-pkgs community repo needed). Local manifest installs are an opt-in winget feature, so the first line below only needs to be run once, as an administrator:
+
+```powershell
+winget settings --enable LocalManifestFiles
+irm https://raw.githubusercontent.com/YutoNiki/OpenPanet/master/winget/OpenPanet.yaml -o OpenPanet.yaml
+winget install --manifest OpenPanet.yaml
+```
 
 ## Wacom tablet setup (important)
 
