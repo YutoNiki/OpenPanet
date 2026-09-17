@@ -911,11 +911,11 @@ function toast(msg, ms = 3200) {
   clearTimeout(hintTimer); hintTimer = setTimeout(() => hintEl.classList.remove('show'), ms);
 }
 document.getElementById('help').onclick = () => toast(
-  '<b>Shift</b>＋ドラッグで直線（<b>Alt</b>併用で45度スナップ）／画像は <b>Ctrl+V</b> で貼り付け、ブラウザからは直接ドロップ<br>' +
-  'ホイールで拡大縮小、<b>Shift</b>＋ホイールでスクロール、<b>Space</b>＋ドラッグで画面移動<br>' +
-  'ペンで書き始めると自動でペンに戻ります／ペンの尻尾はそのまま消しゴムになります<br>' +
-  '右ドラッグ（ペンはバレルボタン）で投げ縄選択、複数選んだものはまとめて移動できます<br>' +
-  'ツールバー右端のボタンを押すと、丸・長方形・正多角形だけを自動できれいな形に補正します（初期状態はオフ）', 8000);
+  'ツール：ペン <b>P</b>／消しゴム <b>E</b>・ペン尻／選択 <b>V</b>／移動 <b>H</b>・<b>Space</b>+ドラッグ<br>' +
+  '<b>Shift</b>+ドラッグ：直線（<b>Alt</b>で45°）／<b>Ctrl+V</b>・ドロップ：画像貼り付け<br>' +
+  'ホイール：ズーム／<b>Shift</b>+ホイール：スクロール／<b>Ctrl+0</b>：等倍<br>' +
+  '右ドラッグ（ペンはバレルボタン）：投げ縄選択、まとめて移動<br>' +
+  '<b>Ctrl+Z</b>/<b>Y</b>：戻す/やり直し／<b>Delete</b>：削除／<b>Ctrl+S</b>：保存', 8000);
 
 window.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
