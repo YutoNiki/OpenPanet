@@ -6,6 +6,7 @@
   <a href="https://github.com/YutoNiki/OpenPanet/stargazers"><img src="https://img.shields.io/github/stars/YutoNiki/OpenPanet" alt="GitHub Repo stars"></a>
   <a href="https://github.com/YutoNiki/OpenPanet/network/members"><img src="https://img.shields.io/github/forks/YutoNiki/OpenPanet" alt="GitHub forks"></a>
   <a href="https://github.com/YutoNiki/OpenPanet/blob/master/LICENSE"><img src="https://img.shields.io/github/license/YutoNiki/OpenPanet" alt="License"></a>
+  <a href="#installing-on-windows"><img src="https://img.shields.io/badge/winget-local_manifest-blue?logo=windowsterminal&logoColor=white" alt="Installable via winget"></a>
 </p>
 
 # OpenPanet
