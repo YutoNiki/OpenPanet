@@ -40,7 +40,7 @@ function createWindow() {
   });
 
   Menu.setApplicationMenu(null);
-  win.loadFile(path.join(__dirname, 'whiteboard.html'));
+  win.loadFile(path.join(__dirname, 'openpanet.html'));
 
   // 外部リンクはアプリ内で開かず既定のブラウザに渡す
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));

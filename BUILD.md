@@ -41,4 +41,4 @@ You can technically cross-build for Windows from Linux or macOS, but the NSIS pa
 
 ## Shrinking the build
 
-Electron bundles all of Chromium, which is why it's ~90MB. If that's a concern, porting to Tauri (Rust + the OS's built-in WebView2) brings it down to 5-10MB. `whiteboard.html` can be reused as-is, but `main.js`'s image-fetching logic would need to be rewritten in Rust.
+Electron bundles all of Chromium, which is why it's ~90MB. If that's a concern, porting to Tauri (Rust + the OS's built-in WebView2) brings it down to 5-10MB. `openpanet.html` can be reused as-is, but `main.js`'s image-fetching logic would need to be rewritten in Rust.

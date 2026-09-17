@@ -20,9 +20,13 @@
 
 A free, open-source whiteboard app, started as a response to Microsoft Whiteboard's retirement. The name blends "Pane" (a window pane) with the sound of "paint".
 
+<p align="center">
+  <a href="https://yutoniki.github.io/OpenPanet/openpanet.html"><strong>&#128073; Try it right now, no install needed &#128072;</strong></a>
+</p>
+
 ![OpenPanet screenshot](UI-image.png)
 
-`whiteboard.html` runs standalone — drag it into Edge/Chrome first to try it out.
+`openpanet.html` runs standalone — try the live version above, or drag the file into Edge/Chrome yourself.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
@@ -96,7 +100,7 @@ The bundled icon depicts a single ink stroke whose width varies with pressure.
 
 | File | Use |
 |---|---|
-| `icon.svg` | Source. Already embedded as a data URI favicon in `whiteboard.html` |
+| `icon.svg` | Source. Already embedded as a data URI favicon in `openpanet.html` |
 | `icon.ico` | Windows executable/window icon (bundles 16-256px) |
 | `icon-256.png`, etc. | Store listings and shortcuts |
 
@@ -134,12 +138,12 @@ Project layout:
 |---|---|
 | `main.js` | Creates the window, fetches image URLs on the main process to avoid tainting the canvas with CORS, and picks the UI language |
 | `preload.js` | Exposes only `window.api.fetchImage` and the detected UI language to the renderer |
-| `whiteboard.html` | The app itself — also runs standalone in a browser |
+| `openpanet.html` | The app itself — also runs standalone in a browser |
 | `package.json` | Includes the electron-builder build configuration |
 
 ## Language
 
-The installer lets you pick English or Japanese; the app's UI follows that choice. Outside the installer (portable build, or the HTML file opened directly in a browser) it falls back to the OS/browser language, defaulting to English. See `whiteboard.html`'s `STRINGS` object and `main.js`'s language detection for details.
+The installer lets you pick English or Japanese; the app's UI follows that choice. Outside the installer (portable build, or the HTML file opened directly in a browser) it falls back to the OS/browser language, defaulting to English. See `openpanet.html`'s `STRINGS` object and `main.js`'s language detection for details.
 
 ## Drag-and-drop from a browser
 

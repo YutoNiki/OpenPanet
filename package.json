@@ -19,7 +19,7 @@
     "appId": "jp.yuto.openpanet",
     "productName": "OpenPanet",
     "directories": { "output": "dist" },
-    "files": ["main.js", "preload.js", "whiteboard.html", "icon.ico"],
+    "files": ["main.js", "preload.js", "openpanet.html", "icon.ico"],
     "win": {
       "icon": "icon.ico",
       "target": [
