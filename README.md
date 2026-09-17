@@ -20,6 +20,8 @@
 
 A free, open-source whiteboard app, started as a response to Microsoft Whiteboard's retirement. The name blends "Pane" (a window pane) with the sound of "paint".
 
+![OpenPanet screenshot](screenshot.png)
+
 `whiteboard.html` runs standalone — drag it into Edge/Chrome first to try it out.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
