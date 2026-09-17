@@ -94,6 +94,8 @@ npm run dist
 
 produces an installer and a portable exe in `dist`. See `BUILD.md` for details.
 
+> **Note:** release builds aren't code-signed, so Windows SmartScreen will show "Windows protected your PC" the first time you run one. Click "More info" -> "Run anyway" to continue — this is expected for an unsigned open-source build.
+
 Project layout:
 
 | File | Role |
