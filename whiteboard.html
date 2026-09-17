@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data: blob: https: http:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Whiteboard</title>
+<title>LibreWhiteboard</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%234d86f7%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232354cc%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2215%22%20fill%3D%22url(%23g)%22%2F%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M14.1%2044.4L15.5%2042.9L16.7%2041.6L17.8%2040.5L18.8%2039.5L19.7%2038.8L20.6%2038.2L21.4%2037.7L22.2%2037.4L22.9%2037.1L23.5%2037L24.2%2036.8L24.8%2036.7L25.5%2036.6L26.3%2036.6L27%2036.5L27.9%2036.5L28.7%2036.5L29.7%2036.5L30.7%2036.5L31.7%2036.5L32.8%2036.5L33.9%2036.4L35%2036.4L36.2%2036.3L37.4%2036.1L38.6%2035.9L39.9%2035.5L41.1%2035.1L42.3%2034.6L43.5%2033.9L44.7%2033.1L45.7%2032.2L46.8%2031.2L47.7%2030.1L48.6%2028.8L49.4%2027.4L50.1%2025.9L50.8%2024.2L51.5%2022.4L52.1%2020.4L49.9%2019.6L49%2021.3L48.1%2022.8L47.1%2024.1L46.2%2025.2L45.2%2026.1L44.3%2026.8L43.5%2027.3L42.6%2027.7L41.8%2028L41%2028.2L40.2%2028.3L39.4%2028.4L38.6%2028.4L37.8%2028.3L37%2028.2L36.2%2028.1L35.3%2028L34.3%2027.8L33.3%2027.7L32.3%2027.5L31.2%2027.4L30.1%2027.2L29%2027.2L27.8%2027.1L26.5%2027.1L25.3%2027.3L23.9%2027.5L22.6%2027.8L21.3%2028.3L20%2028.9L18.7%2029.7L17.5%2030.6L16.4%2031.7L15.3%2033L14.4%2034.4L13.6%2035.9L13%2037.6L12.4%2039.4L12%2041.4L11.9%2043.6Z%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%2251%22%20cy%3D%2220%22%20r%3D%223.9%22%20fill%3D%22%23f2a93b%22%2F%3E%3C%2Fsvg%3E">
 <style>
   :root{
@@ -135,8 +135,8 @@
 
 <div id="consent">
   <div class="box">
-    <h2>ご利用にあたって</h2>
-    <ul>
+    <h2 id="consentTitle">ご利用にあたって</h2>
+    <ul id="consentList">
       <li>作成した内容は自動保存されません。残したい場合は右下の「PNGで保存」から書き出してください。</li>
       <li>画像を貼り付ける際は、著作権・肖像権など第三者の権利を侵害しないようご注意ください。</li>
       <li>入力した内容や画像が外部サーバーへ送信・収集されることはありません（すべてこの端末内で完結します）。</li>
@@ -148,6 +148,78 @@
 <script>
 (() => {
 'use strict';
+
+/* ---------- i18n ---------- */
+const STRINGS = {
+  en: {
+    titlePen: 'Pen (P)', titleEraser: 'Eraser (E)', titleSelect: 'Select (V)', titlePan: 'Pan (H / Space)',
+    titleCustomColor: 'Custom color', sizeLabels: ['Thin', 'Medium', 'Thick'],
+    titleShapeAssist: 'Auto-correct shapes', titleUndo: 'Undo (Ctrl+Z)', titleRedo: 'Redo (Ctrl+Y)',
+    titleSave: 'Save as PNG', titleClear: 'Clear all', titleHelp: 'Help',
+    titleZoomOut: 'Zoom out', titleZoomIn: 'Zoom in', titleZoomReset: 'Reset zoom (Ctrl+0)',
+    penSwitched: 'Switched to the pen',
+    shapeCorrected: 'Shape corrected (press <b>Ctrl+Z</b> to get the hand-drawn line back)',
+    shapeAssistOn: 'Shape auto-correction: on', shapeAssistOff: 'Shape auto-correction: off',
+    nothingToSave: 'Nothing to save',
+    taintedCantSave: "Can't save because it includes an image from another site. Copy the image and paste it again.",
+    imageLoadFailed: "Couldn't load image: ",
+    saveFailed: "Couldn't save (blocked by an external image)",
+    helpText:
+      'Tools: Pen <b>P</b> / Eraser <b>E</b>&middot;pen tail / Select <b>V</b> / Pan <b>H</b>&middot;<b>Space</b>+drag<br>' +
+      '<b>Shift</b>+drag: straight line (<b>Alt</b> for 45&deg;) / <b>Ctrl+V</b>&middot;drop: paste image<br>' +
+      'Wheel: zoom / <b>Shift</b>+wheel: scroll / <b>Ctrl+0</b>: reset zoom<br>' +
+      "Right-drag (or a pen's barrel button): lasso-select, move together<br>" +
+      '<b>Ctrl+Z</b>/<b>Y</b>: undo/redo / <b>Delete</b>: delete / <b>Ctrl+S</b>: save',
+    consentTitle: 'Before you start',
+    consentItems: [
+      'Nothing is saved automatically — use “Save as PNG” (bottom right) to keep your work.',
+      'When pasting images, make sure you have the right to use them (copyright, likeness, etc.).',
+      'Nothing you type or paste is sent anywhere — everything stays on this device.'
+    ],
+    consentAgree: 'Agree and start'
+  },
+  ja: {
+    titlePen: 'ペン (P)', titleEraser: '消しゴム (E)', titleSelect: '選択 (V)', titlePan: '移動 (H / Space)',
+    titleCustomColor: '任意の色', sizeLabels: ['細', '中', '太'],
+    titleShapeAssist: '図形を自動できれいに補正', titleUndo: '元に戻す (Ctrl+Z)', titleRedo: 'やり直し (Ctrl+Y)',
+    titleSave: 'PNGで保存', titleClear: '全消去', titleHelp: '使い方',
+    titleZoomOut: '縮小', titleZoomIn: '拡大', titleZoomReset: '等倍に戻す (Ctrl+0)',
+    penSwitched: 'ペンに切り替えました',
+    shapeCorrected: '図形に補正しました（<b>Ctrl+Z</b> で手描きの線に戻せます）',
+    shapeAssistOn: '図形の自動補正：オン', shapeAssistOff: '図形の自動補正：オフ',
+    nothingToSave: '保存する内容がありません',
+    taintedCantSave: '外部サイトの画像を含むため保存できません。画像をコピーして貼り付け直してください',
+    imageLoadFailed: '画像を読み込めませんでした：',
+    saveFailed: '保存できませんでした（外部画像の制約）',
+    helpText:
+      'ツール：ペン <b>P</b>／消しゴム <b>E</b>・ペン尻／選択 <b>V</b>／移動 <b>H</b>・<b>Space</b>+ドラッグ<br>' +
+      '<b>Shift</b>+ドラッグ：直線（<b>Alt</b>で45°）／<b>Ctrl+V</b>・ドロップ：画像貼り付け<br>' +
+      'ホイール：ズーム／<b>Shift</b>+ホイール：スクロール／<b>Ctrl+0</b>：等倍<br>' +
+      '右ドラッグ（ペンはバレルボタン）：投げ縄選択、まとめて移動<br>' +
+      '<b>Ctrl+Z</b>/<b>Y</b>：戻す/やり直し／<b>Delete</b>：削除／<b>Ctrl+S</b>：保存',
+    consentTitle: 'ご利用にあたって',
+    consentItems: [
+      '作成した内容は自動保存されません。残したい場合は右下の「PNGで保存」から書き出してください。',
+      '画像を貼り付ける際は、著作権・肖像権など第三者の権利を侵害しないようご注意ください。',
+      '入力した内容や画像が外部サーバーへ送信・収集されることはありません（すべてこの端末内で完結します）。'
+    ],
+    consentAgree: '同意して始める'
+  }
+};
+const LANG = (window.api && window.api.lang) ||
+  (((navigator.language || '').toLowerCase().startsWith('ja')) ? 'ja' : 'en');
+const T = STRINGS[LANG] || STRINGS.en;
+document.documentElement.lang = LANG;
+(() => {
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.title = v; };
+  set('t-pen', T.titlePen); set('t-eraser', T.titleEraser); set('t-select', T.titleSelect); set('t-pan', T.titlePan);
+  set('custom', T.titleCustomColor); set('shapeAssist', T.titleShapeAssist);
+  set('undo', T.titleUndo); set('redo', T.titleRedo); set('save', T.titleSave); set('clear', T.titleClear); set('help', T.titleHelp);
+  set('zoomOut', T.titleZoomOut); set('zoomIn', T.titleZoomIn); set('zoomReset', T.titleZoomReset);
+  document.getElementById('consentTitle').textContent = T.consentTitle;
+  document.getElementById('consentList').innerHTML = T.consentItems.map(t => `<li>${t}</li>`).join('');
+  document.getElementById('consentAgree').textContent = T.consentAgree;
+})();
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
@@ -373,7 +445,7 @@ canvas.addEventListener('pointerdown', e => {
       && !['pen', 'eraser', 'pan'].includes(tool)
       && !overSelection(w)) {
     setTool('pen');
-    if (!autoPenNoticed) { autoPenNoticed = true; toast('ペンに切り替えました', 1600); }
+    if (!autoPenNoticed) { autoPenNoticed = true; toast(T.penSwitched, 1600); }
   }
 
   const wantPan = e.button === 1 || spaceDown || tool === 'pan' || e.pointerType === 'touch';
@@ -494,7 +566,7 @@ function endPointer() {
       const s = beautify(live);
       if (s) {
         out = s; lastBeautified = { shape: s, raw: live };
-        if (!shapeNoticed) { shapeNoticed = true; toast('図形に補正しました（<b>Ctrl+Z</b> で手描きの線に戻せます）', 3000); }
+        if (!shapeNoticed) { shapeNoticed = true; toast(T.shapeCorrected, 3000); }
       }
     }
     items.push(out);
@@ -771,7 +843,7 @@ function loadURLDirect(url, sx, sy) {
   img.onerror = () => {                          // 失敗したらCORSなしで（PNG保存は不可になる）
     const img2 = new Image();
     img2.onload = () => { tainted = true; placeImage(img2, sx, sy); };
-    img2.onerror = () => toast('画像を読み込めませんでした：' + url);
+    img2.onerror = () => toast(T.imageLoadFailed + url);
     img2.src = url;
   };
   img.src = url;
@@ -812,8 +884,8 @@ window.addEventListener('drop', e => {
 
 /* ---------- 保存 ---------- */
 function savePNG() {
-  if (!items.length) return toast('保存する内容がありません');
-  if (tainted) return toast('外部サイトの画像を含むため保存できません。画像をコピーして貼り付け直してください');
+  if (!items.length) return toast(T.nothingToSave);
+  if (tainted) return toast(T.taintedCantSave);
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const it of items) {
     const b = itemBBox(it);
@@ -836,7 +908,7 @@ function savePNG() {
       a.download = 'whiteboard-' + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '') + '.png';
       a.click();
     });
-  } catch (err) { toast('保存できませんでした（外部画像の制約）'); }
+  } catch (err) { toast(T.saveFailed); }
 }
 
 /* ---------- UI ---------- */
@@ -873,7 +945,6 @@ function setTool(t) {
 /* サイズ選択：ペン／消しゴムでそれぞれ別の太さを覚えておく */
 const PEN_SIZES = [{ w: 2, d: 5 }, { w: 5, d: 9 }, { w: 12, d: 15 }];
 const ERASER_SIZES = [{ w: 16, d: 10 }, { w: 26, d: 16 }, { w: 40, d: 23 }];
-const SIZE_TITLES = ['細', '中', '太'];
 const sizesWrap = document.getElementById('sizes');
 function renderSizes() {
   const set = tool === 'eraser' ? ERASER_SIZES : PEN_SIZES;
@@ -881,7 +952,7 @@ function renderSizes() {
   sizesWrap.innerHTML = '';
   set.forEach((s, i) => {
     const b = document.createElement('button');
-    b.className = 'sz'; b.title = SIZE_TITLES[i];
+    b.className = 'sz'; b.title = T.sizeLabels[i];
     b.style.setProperty('--d', s.d + 'px');
     b.setAttribute('aria-pressed', String(s.w === current));
     b.innerHTML = '<i></i>';
@@ -915,7 +986,7 @@ canvas.addEventListener('pointerleave', () => { eraserCursorEl.style.display = '
 document.getElementById('shapeAssist').onclick = e => {
   shapeAssist = !shapeAssist;
   e.currentTarget.setAttribute('aria-pressed', String(shapeAssist));
-  toast(shapeAssist ? '図形の自動補正：オン' : '図形の自動補正：オフ', 1400);
+  toast(shapeAssist ? T.shapeAssistOn : T.shapeAssistOff, 1400);
 };
 
 document.getElementById('undo').onclick = undo;
@@ -935,12 +1006,7 @@ function toast(msg, ms = 3200) {
   hintEl.innerHTML = msg; hintEl.classList.add('show');
   clearTimeout(hintTimer); hintTimer = setTimeout(() => hintEl.classList.remove('show'), ms);
 }
-document.getElementById('help').onclick = () => toast(
-  'ツール：ペン <b>P</b>／消しゴム <b>E</b>・ペン尻／選択 <b>V</b>／移動 <b>H</b>・<b>Space</b>+ドラッグ<br>' +
-  '<b>Shift</b>+ドラッグ：直線（<b>Alt</b>で45°）／<b>Ctrl+V</b>・ドロップ：画像貼り付け<br>' +
-  'ホイール：ズーム／<b>Shift</b>+ホイール：スクロール／<b>Ctrl+0</b>：等倍<br>' +
-  '右ドラッグ（ペンはバレルボタン）：投げ縄選択、まとめて移動<br>' +
-  '<b>Ctrl+Z</b>/<b>Y</b>：戻す/やり直し／<b>Delete</b>：削除／<b>Ctrl+S</b>：保存', 8000);
+document.getElementById('help').onclick = () => toast(T.helpText, 8000);
 
 window.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || awaitingConsent) return;

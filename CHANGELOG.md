@@ -1,24 +1,31 @@
-# 更新履歴
+# Changelog
+
+## 1.2.0
+
+- Renamed the project to **LibreWhiteboard**
+- Translated README, the build notes, and this changelog to English
+- The installer now lets you choose English or Japanese during setup
+- The app's UI (tooltips, popups, the first-run notice) now follows that choice, falling back to the OS/browser language when run outside the installer (portable build or standalone HTML)
 
 ## 1.1.0
 
-- 消しゴムで画像が消えないように変更。画像の上に描いたペンの線は従来どおり消せる
-- 消しゴムのサイズを3段階から選択できるように。消える範囲を示す丸カーソルを追加
-- 拡大縮小を常に10%刻みに変更（ホイール・ボタン共通）
-- 図形の自動補正を「丸・長方形・正多角形」だけに限定。開いた線（直線）や歪んだ多角形、真円でない楕円は補正しないように変更。正方形に近い四角形は正方形に揃えるように
-- 右ドラッグ（ペンはバレルボタン）で自由な範囲を囲んで複数オブジェクトを選択できる「投げ縄選択」を追加。選択したオブジェクトは位置関係を保ったまままとめて移動できる
-- オブジェクトを移動・リサイズした後にUndoが効かない不具合を修正
-- 消しゴム／移動ツールのアイコンを見直し、より分かりやすい形状に変更
-- Undo・保存・全消去などのボタンを右上から右下に移動
-- 「使い方」ポップアップの説明を簡潔な操作一覧に整理
-- 初回起動時に注意事項への同意を求めるポップアップを追加
-- 特定用途向けだった説明文言を整理し、一般公開向けの表現に変更
+- Eraser no longer erases images; pen strokes drawn on top of an image can still be erased
+- Eraser size is now selectable (3 sizes), with a circular cursor showing the affected area
+- Zoom now always snaps to 10% steps (wheel and buttons)
+- Shape auto-correction limited to circle / rectangle / regular polygon. Open strokes (straight lines), irregular polygons, and non-circular ellipses are no longer corrected. Near-square rectangles now snap to a true square
+- Added lasso selection: right-drag (or a pen's barrel button) to freehand-select multiple objects, then move them together while preserving their relative positions
+- Fixed a bug where undo didn't work after moving or resizing an object
+- Redesigned the eraser and pan tool icons to be clearer
+- Moved undo/save/clear-all from the top-right to the bottom-right
+- Simplified the help popup into a terse list of controls
+- Added a first-run popup asking the user to acknowledge a short notice
+- Removed wording specific to one particular use case, in preparation for a public release
 
 ## 1.0.0
 
-- 初回リリース
-  - 筆圧対応のペン描画（Windows Ink経由）、消しゴム、選択・移動、画面パン
-  - 図形の自動補正（当時は直線・楕円・多角形すべてに対応）
-  - 画像のクリップボード貼り付け・ドラッグ＆ドロップ（Electron版はCORS回避つき）
-  - Undo/Redo、PNG書き出し
-  - Windows向けインストーラ／ポータブルexeのビルド対応
+- Initial release
+  - Pressure-sensitive pen input (via Windows Ink), eraser, select/move, canvas pan
+  - Shape auto-correction (at the time: straight lines, ellipses, and polygons of any kind)
+  - Paste/drag-and-drop images from the clipboard (Electron build avoids CORS issues)
+  - Undo/redo, PNG export
+  - Windows installer/portable exe build support

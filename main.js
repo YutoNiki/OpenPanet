@@ -1,12 +1,26 @@
 const { app, BrowserWindow, ipcMain, net, Menu } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 // ペン入力の遅延を減らす
 app.commandLine.appendSwitch('enable-features', 'CanvasOopRasterization');
 
 let win = null;
 
+// The NSIS installer writes lang.txt next to the exe with the language
+// chosen during setup (see build/installer.nsh). Portable/dev runs won't
+// have it, so fall back to the OS locale.
+function detectLang() {
+  try {
+    const langFile = path.join(path.dirname(app.getPath('exe')), 'lang.txt');
+    const saved = fs.readFileSync(langFile, 'utf8').trim();
+    if (saved === 'ja' || saved === 'en') return saved;
+  } catch {}
+  return app.getLocale().toLowerCase().startsWith('ja') ? 'ja' : 'en';
+}
+
 function createWindow() {
+  const lang = detectLang();
   win = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -14,13 +28,14 @@ function createWindow() {
     minHeight: 600,
     backgroundColor: '#faf9f8',
     icon: path.join(__dirname, 'icon.ico'),
-    title: 'ホワイトボード',
+    title: 'LibreWhiteboard',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      spellcheck: false
+      spellcheck: false,
+      additionalArguments: [`--app-lang=${lang}`]
     }
   });
 

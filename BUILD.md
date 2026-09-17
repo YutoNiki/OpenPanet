@@ -1,49 +1,44 @@
-# exe の作り方
+# Building the .exe
 
-Windows の PowerShell またはコマンドプロンプトで、このフォルダに移動して実行します。
-Node.js（18 以上）が必要です。未導入なら https://nodejs.org から LTS 版を入れてください。
+From Windows PowerShell or Command Prompt, in this folder:
+Node.js 18+ is required — grab the LTS release from https://nodejs.org if you don't have it.
 
 ```
 npm install
 npm run dist
 ```
 
-`dist` フォルダに次の 2 つができます。
+This produces two files in `dist`:
 
-| ファイル | 中身 |
+| File | What it is |
 |---|---|
-| `Whiteboard Setup 1.0.0.exe` | インストーラ。インストール先を選べてデスクトップにショートカットも作られる |
-| `Whiteboard-portable-1.0.0.exe` | 単体で動くポータブル版。USB に入れて別の PC でもそのまま起動できる |
+| `LibreWhiteboard Setup 1.2.0.exe` | Installer. Lets you pick the install location and language (English/Japanese), and creates a desktop shortcut |
+| `LibreWhiteboard-portable-1.2.0.exe` | Standalone portable build — copy it to a USB drive and run it on any PC |
 
-どちらも 90MB 前後です。Chromium を丸ごと同梱するため、この程度のサイズになります。
+Both are around 90MB, since Electron bundles the whole of Chromium.
 
-インストーラが不要ならポータブル版だけ作れます。
+If you don't need the installer, build just the portable version:
 
 ```
 npm run dist:portable
 ```
 
-開発中に動かして確認するだけなら、ビルドせずに起動できます。
+To just try it out during development, run it without building:
 
 ```
 npm start
 ```
 
-## 初回起動時の警告について
+## About the first-run warning
 
-署名していない exe なので、Windows SmartScreen が「WindowsによってPCが保護されました」と出します。
-「詳細情報」→「実行」で起動できます。少人数で使う分にはこれで問題ありません。
+Because the exe isn't code-signed, Windows SmartScreen will show "Windows protected your PC". Click "More info" -> "Run anyway" to launch it — that's expected and fine for small-scale use.
 
-配布先を増やして警告を消したい場合はコードサイニング証明書（年 2〜5 万円程度）が必要になります。
-取得したら `package.json` の `build.win` に `certificateFile` と `certificatePassword` を足してください。
+To remove the warning for a wider audience you'd need a code-signing certificate (roughly $150-350/year). Once you have one, add `certificateFile` and `certificatePassword` to `build.win` in `package.json`.
 
-## 注意：ビルドは Windows 上で行ってください
+## Note: build on Windows
 
-Linux や macOS からでも Windows 向けにビルドできますが、NSIS のパッケージ工程で wine が必要になります。
-Windows 上なら追加の準備は要りません。
+You can technically cross-build for Windows from Linux or macOS, but the NSIS packaging step needs wine. Building on Windows needs no extra setup.
 
-## サイズを小さくしたい場合
+## Shrinking the build
 
-Electron は Chromium ごと同梱するため 90MB 前後になります。
-これが気になるなら Tauri（Rust + OS 標準の WebView2）に載せ替えると 5〜10MB まで落ちます。
-`whiteboard.html` はそのまま使えますが、`main.js` の画像取得処理は Rust で書き直しになります。
+Electron bundles all of Chromium, which is why it's ~90MB. If that's a concern, porting to Tauri (Rust + the OS's built-in WebView2) brings it down to 5-10MB. `whiteboard.html` can be reused as-is, but `main.js`'s image-fetching logic would need to be rewritten in Rust.

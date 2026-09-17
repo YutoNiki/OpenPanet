@@ -1,79 +1,72 @@
-# ホワイトボード
+# LibreWhiteboard
 
-`whiteboard.html` は単体で動きます。まず Edge / Chrome にドラッグして操作感を確かめてください。
+`whiteboard.html` runs standalone — drag it into Edge/Chrome first to try it out.
 
-更新履歴は [CHANGELOG.md](CHANGELOG.md) を参照してください。
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
-## Wacom ペンタブの設定（最重要）
+## Wacom tablet setup (important)
 
-ブラウザ／Electron がペンの筆圧・傾きを受け取れるのは **Windows Ink 経由**です。
+The browser/Electron only receives pen pressure and tilt via **Windows Ink**.
 
-1. 「ワコム タブレットのプロパティ」→ ペン → **「Windows Ink を使用する」にチェック**
-2. チェックが外れていると `PointerEvent.pressure` が常に 0.5 になり、線の強弱が出ません
-3. 「押した瞬間に丸い波紋が出る」「長押しで右クリックメニュー」が邪魔なときは、
-   Windows の「ペンと Windows Ink」設定、または ワコムデスクトップセンター側で視覚効果を切ります
+1. Open "Wacom Tablet Properties" → Pen → check **"Use Windows Ink"**
+2. If unchecked, `PointerEvent.pressure` stays a constant 0.5 and strokes lose their pressure-based width
+3. If the ripple effect on tap, or the long-press right-click menu, gets in the way, turn those visual effects off in Windows' "Pen & Windows Ink" settings or the Wacom Desktop Center
 
-このアプリ側では次を実装済みです。
+Already implemented in the app:
 
-| 項目 | 実装 |
+| Feature | Implementation |
 |---|---|
-| 筆圧 | `e.pressure` を線幅に反映（線幅 × (0.35 + 0.65 × 筆圧)） |
-| 追従性 | `pointerrawupdate` + `getCoalescedEvents()` で間引きされた座標も拾う |
-| ペン尻の消しゴム | `e.buttons & 32` を消しゴムとして判定 |
-| 自動ペン切替 | `e.pointerType === 'pen'` の接触でペンツールへ復帰（消しゴム・手のひら・選択中オブジェクト上は除外） |
-| カーソル | ツールに合わせて SVG カーソルを切り替え（ペン／消しゴム／グラブ）。ペン尻での消去中も消しゴム表示 |
+| Pressure | `e.pressure` drives stroke width (width × (0.35 + 0.65 × pressure)) |
+| Tracking | `pointerrawupdate` + `getCoalescedEvents()` also pick up points the browser would otherwise drop |
+| Eraser via pen tail | `e.buttons & 32` is treated as the eraser |
+| Auto pen switch | Touching with `e.pointerType === 'pen'` switches back to the pen tool (except while erasing, panning, or over a selected object) |
+| Cursor | SVG cursor changes per tool (pen / eraser / grab); erasing with the pen tail still shows the eraser cursor |
 
-## 図形の自動補正
+## Shape auto-correction
 
-ツールバー右端のボタンでオン／オフ（**起動時はオフ**）。オンにすると、ペンを離した瞬間に判定し、**丸・長方形・正多角形**のいずれかに当てはまるときだけ置き換えます（開いた線＝直線や、真円でない楕円、規則性のない多角形には補正しません）。
+Toggled by the button at the right end of the toolbar (**off by default**). When on, releasing the pen evaluates the stroke and replaces it only if it matches a **circle, rectangle, or regular polygon** (open strokes/straight lines, non-circular ellipses, and irregular polygons are left untouched).
 
-判定の流れ:
+How it decides:
 
-1. 対角長が 56px 未満、または線長が対角長の 0.8 倍未満のストロークは対象外（手書き文字を巻き込まないため）
-2. 始点と終点が離れている（閉じていない）ストロークは対象外
-3. 閉じていれば、多角形と円それぞれの当てはめ誤差を比較
-   - 多角形: RDP の粒度を 6 通り変えて頂点を求め、誤差が対角長の 2% 未満のうち最も頂点が少ないものを採用。さらに軸に揃った長方形（縦横比が近ければ正方形に）、または辺・頂点間隔のばらつきが小さい正多角形に整えられた場合のみ採用（どちらにもならない歪な多角形は補正しない）
-   - 円: 外接矩形から求めた楕円との半径方向の誤差が対角長の 4.5% 未満で、かつほぼ真円（縦横比 0.87〜1.15）の場合のみ採用
-4. 正多角形の向き（回転角）は描いたときのものを保持
+1. Strokes with a bounding-box diagonal under 56px, or a path length under 0.8x that diagonal, are skipped (so handwriting isn't affected)
+2. Strokes that aren't closed (start and end far apart) are skipped
+3. For closed strokes, it compares the fit error of a polygon vs. a circle:
+   - Polygon: tries 6 different RDP simplification thresholds, keeping the one with the fewest vertices whose error is under 2% of the diagonal. It's only accepted if it can be straightened into an axis-aligned rectangle (snapped to a square when close to one) or a true regular polygon — an irregular polygon that fits neither is left uncorrected
+   - Circle: accepted only if the radial error against the best-fit ellipse is under 4.5% of the diagonal *and* the aspect ratio is close to 1 (0.87-1.15)
+4. A regular polygon keeps the rotation it was drawn at
 
-補正直後の 1 回目の Ctrl+Z は、図形を消すのではなく手描きの線に戻します。
+Full details live in `beautify()`. If it's over- or under-triggering, tune `diag < 56` (minimum size) and `polyTol = diag * 0.02` (polygon error tolerance).
 
-閾値は `beautify()` の中に集約してあります。補正が効きすぎる／効かないと感じたら、
-`diag < 56`（最小サイズ）と `polyTol = diag * 0.02`（多角形の許容誤差）を触ってください。
+### Switching to "pause, then release, to correct"
 
-### 「少し止めてから離すと補正」に変えたい場合
+The OneNote-style timing produces fewer false positives. Record `lastMoveAt = performance.now()` at the end of `handleMove`, then change the correction condition in `endPointer` to `shapeAssist && performance.now() - lastMoveAt > 350`.
 
-OneNote 方式のほうが誤爆は減ります。`handleMove` の末尾で `lastMoveAt = performance.now()` を記録し、
-`endPointer` の補正条件を `shapeAssist && performance.now() - lastMoveAt > 350` にすれば切り替わります。
+## Canvas controls
 
-
-
-## 画面操作
-
-| 操作 | 割り当て |
+| Action | Binding |
 |---|---|
-| ホイール | 拡大縮小（カーソル位置が中心、10%刻み） |
-| Shift＋ホイール | 上下左右スクロール |
-| Space＋ドラッグ / 中ボタンドラッグ | 画面移動 |
-| 右ドラッグ（ペンはバレルボタン） | 投げ縄で範囲選択。囲んだオブジェクトをまとめて選択し、選択ツールに切り替わる |
-| Ctrl+0 | 等倍に戻す |
-| 誤タッチ防止 | `touch-action: none`、タッチは画面移動のみに割り当て |
+| Wheel | Zoom, centered on the cursor (10% steps) |
+| Shift + wheel | Scroll |
+| Space + drag / middle-button drag | Pan |
+| Right-drag (a pen's barrel button works too) | Lasso-select a freeform area; selects everything it touches and switches to the select tool |
+| Ctrl+0 | Reset zoom to 100% |
+| Touch guard | `touch-action: none`; touch is only used for panning |
 
-## 複数オブジェクトの選択・移動
+## Selecting and moving multiple objects
 
-右ドラッグで自由な形に囲むと、線の一部または画像が触れているオブジェクトがまとめて選択される（投げ縄選択）。選択後は自動的に選択ツールに切り替わり、選択範囲の内側からドラッグすると全オブジェクトの位置関係を保ったまま移動できる。範囲外をクリックするとグループ選択は解除される。Delete / Backspaceでまとめて削除も可能。
+Right-drag a freeform loop to lasso-select every stroke or image it touches. The select tool activates automatically, and dragging from inside the selection moves every selected object together, preserving their relative positions. Clicking outside the selection clears it. Delete/Backspace removes the whole group.
 
-## アイコン
+## Icon
 
-同梱のアイコンは、筆圧で太さが変わるインクの一筆書きを図案化したものです。
+The bundled icon depicts a single ink stroke whose width varies with pressure.
 
-| ファイル | 用途 |
+| File | Use |
 |---|---|
-| `icon.svg` | 原本。`whiteboard.html` には data URI として埋め込み済み（favicon） |
-| `icon.ico` | Windows 実行ファイル・ウィンドウ用（16〜256px を内包） |
-| `icon-256.png` ほか | ストア掲載やショートカット用 |
+| `icon.svg` | Source. Already embedded as a data URI favicon in `whiteboard.html` |
+| `icon.ico` | Windows executable/window icon (bundles 16-256px) |
+| `icon-256.png`, etc. | Store listings and shortcuts |
 
-Electron のウィンドウとタスクバーに反映するには `main.js` の `BrowserWindow` に追加します。
+To use it for the Electron window/taskbar, add it to `main.js`'s `BrowserWindow`:
 
 ```js
 const win = new BrowserWindow({
@@ -82,50 +75,41 @@ const win = new BrowserWindow({
 });
 ```
 
-electron-builder で .exe に埋め込む場合は `package.json` に次を追記します。
+To embed it in the built .exe via electron-builder, add this to `package.json`:
 
 ```json
 "build": { "win": { "icon": "icon.ico" } }
 ```
 
-## 実行ファイル（exe）にする
+## Building a Windows executable
 
-`whiteboard-app.zip` に Electron プロジェクト一式が入っています。Windows で展開して
+This repo is a complete Electron project. On Windows:
 
 ```
 npm install
 npm run dist
 ```
 
-を実行すると、`dist` にインストーラとポータブル版の exe ができます。詳細は同梱の `BUILD.md` を参照してください。
+produces an installer and a portable exe in `dist`. See `BUILD.md` for details.
 
-プロジェクトの構成:
+Project layout:
 
-| ファイル | 役割 |
+| File | Role |
 |---|---|
-| `main.js` | ウィンドウ生成。画像URLの取得をメインプロセス側で行い CORS 汚染を回避する |
-| `preload.js` | レンダラーに `window.api.fetchImage` だけを公開する橋渡し |
-| `whiteboard.html` | アプリ本体。単体でもブラウザで動く |
-| `package.json` | electron-builder のビルド設定を含む |
+| `main.js` | Creates the window, fetches image URLs on the main process to avoid tainting the canvas with CORS, and picks the UI language |
+| `preload.js` | Exposes only `window.api.fetchImage` and the detected UI language to the renderer |
+| `whiteboard.html` | The app itself — also runs standalone in a browser |
+| `package.json` | Includes the electron-builder build configuration |
 
-### 動作確認済みの内容
+## Language
 
-Linux コンテナ上で Electron 43 / electron-builder 26 により検証しました。
+The installer lets you pick English or Japanese; the app's UI follows that choice. Outside the installer (portable build, or the HTML file opened directly in a browser) it falls back to the OS/browser language, defaulting to English. See `whiteboard.html`'s `STRINGS` object and `main.js`'s language detection for details.
 
-- Windows x64 バイナリの生成に成功（`Whiteboard.exe` 215MB、PE ヘッダの machine = 0x8664）
-- 自作アイコン 7 サイズすべてが exe のリソースに正しく埋め込まれていることを確認
-- Xvfb 上で実際にアプリを起動し、キャンバス生成・ツールバー 22 個・favicon・`window.api.fetchImage` の公開・ペン描画・図形補正の発火をすべて確認。コンソールエラーなし
-- NSIS でのパッケージ工程だけは wine を要するため、Linux 側では未完了。Windows 上でビルドすれば追加の準備なしに通ります
+## Drag-and-drop from a browser
 
-この検証中に 2 件の不具合を見つけて修正しました。`setPointerCapture` が失敗すると描画処理全体が止まる問題と、`getCoalescedEvents()` が空配列を返す環境で入力を取りこぼす問題です。
+Dragging an image out of Chrome often hands you a **URL**, not the actual file. This app reads the `<img src>` from the `text/html` drag data, but if the source site doesn't allow CORS, the canvas becomes tainted and PNG export stops working (the app shows a warning when this happens).
 
-## ブラウザからのドラッグ&ドロップの注意
-
-Chrome から画像をドラッグすると、実体のファイルではなく **URL だけ**が渡ってくることが多いです。
-このプロトタイプは `text/html` の `<img src>` を拾って読み込みますが、
-サイトが CORS を許可していないと canvas が汚染され、PNG 保存ができなくなります（アプリ側で警告を出します）。
-
-Electron ならこれを回避できます。メインプロセスで画像を取得して data URL で返す方式です。
+Electron avoids this by fetching the image on the main process and returning a data URL:
 
 ```js
 // main.js
@@ -137,12 +121,11 @@ ipcMain.handle('fetch-image', async (_e, url) => {
 });
 ```
 
-preload で `contextBridge.exposeInMainWorld('api', { fetchImage: url => ipcRenderer.invoke('fetch-image', url) })` を公開し、
-`loadURL()` の中でまず `window.api?.fetchImage(url)` を試すように差し替えてください。
+Expose it from preload with `contextBridge.exposeInMainWorld('api', { fetchImage: url => ipcRenderer.invoke('fetch-image', url) })`, and have `loadURL()` try `window.api?.fetchImage(url)` first.
 
-## 次に足すとよいもの
+## Possible next steps
 
-- ページ（ボード）切り替え、ボードの保存・復元（JSON で items をシリアライズ。画像は data URL 化）
-- 図形ツール（四角・丸・矢印）、テキストボックス
-- レーザーポインタ（一定時間で消える軌跡）— 画面共有中に指し示す用途で効きます
-- 複数人でのリアルタイム共同編集（Yjs + WebSocket など）
+- Page/board switching, saving and restoring a board (serialize `items` to JSON; images as data URLs)
+- Shape tools (rectangle, circle, arrow), text boxes
+- A laser pointer (a trail that fades after a moment) — useful for pointing things out during screen sharing
+- Real-time collaborative editing with multiple people (e.g. Yjs + WebSocket)

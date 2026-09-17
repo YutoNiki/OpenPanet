@@ -1,7 +1,7 @@
 {
-  "name": "whiteboard",
-  "version": "1.1.0",
-  "description": "手書き・画像貼り付けに対応したシンプルなホワイトボードアプリ",
+  "name": "librewhiteboard",
+  "version": "1.2.0",
+  "description": "A simple, open-source whiteboard app with pressure-sensitive pen input and image pasting",
   "main": "main.js",
   "author": "Yuto",
   "license": "MIT",
@@ -16,8 +16,8 @@
     "electron-builder": "^26.15.3"
   },
   "build": {
-    "appId": "jp.yuto.whiteboard",
-    "productName": "Whiteboard",
+    "appId": "jp.yuto.librewhiteboard",
+    "productName": "LibreWhiteboard",
     "directories": { "output": "dist" },
     "files": ["main.js", "preload.js", "whiteboard.html", "icon.ico"],
     "win": {
@@ -31,9 +31,12 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "ホワイトボード"
+      "shortcutName": "LibreWhiteboard",
+      "displayLanguageSelector": true,
+      "installerLanguages": ["en_US", "ja_JP"],
+      "language": "1033"
     },
-    "portable": { "artifactName": "Whiteboard-portable-${version}.exe" },
+    "portable": { "artifactName": "LibreWhiteboard-portable-${version}.exe" },
     "compression": "maximum"
   }
 }
