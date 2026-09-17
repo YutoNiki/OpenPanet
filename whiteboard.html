@@ -78,11 +78,16 @@
   <button id="t-pen" data-tool="pen" title="ペン (P)" aria-pressed="true">
     <svg viewBox="0 0 24 24"><path d="M4 20l4-1 10-10a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/></svg></button>
   <button id="t-eraser" data-tool="eraser" title="消しゴム (E)" aria-pressed="false">
-    <svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="4" y="8" width="16" height="8" rx="2"/><line x1="4" y1="12" x2="20" y2="12"/></g></svg></button>
+    <svg viewBox="0 0 24 24"><g transform="rotate(-45 12 11)"><rect x="4" y="7.5" width="15" height="8" rx="1.5"/><line x1="9" y1="7.5" x2="9" y2="15.5"/></g><line x1="4" y1="20" x2="16" y2="20"/></svg></button>
   <button id="t-select" data-tool="select" title="選択 (V)" aria-pressed="false">
     <svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10 19z"/></svg></button>
   <button id="t-pan" data-tool="pan" title="移動 (H / Space)" aria-pressed="false">
-    <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l3 3"/></svg></button>
+    <svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none">
+      <path d="M10.3 8.5L10.3 5.5L8.5 5.5L12 2.2L15.5 5.5L13.7 5.5L13.7 8.5Z"/>
+      <path d="M10.3 8.5L10.3 5.5L8.5 5.5L12 2.2L15.5 5.5L13.7 5.5L13.7 8.5Z" transform="rotate(90 12 12)"/>
+      <path d="M10.3 8.5L10.3 5.5L8.5 5.5L12 2.2L15.5 5.5L13.7 5.5L13.7 8.5Z" transform="rotate(180 12 12)"/>
+      <path d="M10.3 8.5L10.3 5.5L8.5 5.5L12 2.2L15.5 5.5L13.7 5.5L13.7 8.5Z" transform="rotate(270 12 12)"/>
+    </g></svg></button>
   <span class="sep"></span>
   <div class="swatches" id="swatches"></div>
   <input type="color" id="custom" value="#1b1a19" title="任意の色">
