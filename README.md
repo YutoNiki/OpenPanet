@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://github.com/YutoNiki/OpenPanet/stargazers"><img src="https://img.shields.io/github/stars/YutoNiki/OpenPanet" alt="GitHub Repo stars"></a>
   <a href="https://github.com/YutoNiki/OpenPanet/network/members"><img src="https://img.shields.io/github/forks/YutoNiki/OpenPanet" alt="GitHub forks"></a>
-  <a href="https://github.com/YutoNiki/OpenPanet/blob/master/LICENSE"><img src="https://img.shields.io/github/license/YutoNiki/OpenPanet" alt="License"></a>
+  <a href="https://github.com/YutoNiki/OpenPanet/blob/main/LICENSE"><img src="https://img.shields.io/github/license/YutoNiki/OpenPanet" alt="License"></a>
   <a href="#installing-on-windows"><img src="https://img.shields.io/badge/winget-local_manifest-blue?logo=windowsterminal&logoColor=white" alt="Installable via winget"></a>
 </p>
 
@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://github.com/YutoNiki/OpenPanet/releases/latest"><img src="https://img.shields.io/github/v/release/YutoNiki/OpenPanet" alt="Latest release"></a>
-  <a href="https://github.com/YutoNiki/OpenPanet/commits/master"><img src="https://img.shields.io/github/commits-since/YutoNiki/OpenPanet/latest" alt="Commits since last release"></a>
+  <a href="https://github.com/YutoNiki/OpenPanet/commits/main"><img src="https://img.shields.io/github/commits-since/YutoNiki/OpenPanet/latest" alt="Commits since last release"></a>
   <a href="https://github.com/YutoNiki/OpenPanet/graphs/contributors"><img src="https://img.shields.io/github/contributors/YutoNiki/OpenPanet" alt="Contributors"></a>
   <a href="https://github.com/YutoNiki/OpenPanet/releases"><img src="https://img.shields.io/github/downloads/YutoNiki/OpenPanet/total" alt="Downloads"></a>
 </p>
@@ -38,7 +38,7 @@ Alternatively, install straight from the command line via winget and the manifes
 
 ```powershell
 winget settings --enable LocalManifestFiles
-irm https://raw.githubusercontent.com/YutoNiki/OpenPanet/master/winget/OpenPanet.yaml -o OpenPanet.yaml
+irm https://raw.githubusercontent.com/YutoNiki/OpenPanet/main/winget/OpenPanet.yaml -o OpenPanet.yaml
 winget install --manifest OpenPanet.yaml
 ```
 
