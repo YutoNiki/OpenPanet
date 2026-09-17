@@ -519,7 +519,7 @@ function regularize(poly) {
       return { x: c.x + R * Math.cos(a), y: c.y + R * Math.sin(a) };
     });
   }
-  return poly;
+  return null;   // 長方形にも正多角形にもならない形は補正しない
 }
 
 function beautify(s) {
@@ -535,11 +535,9 @@ function beautify(s) {
     points: points.map(q => ({ x: q.x, y: q.y, p }))
   });
 
+  // 補正対象は丸・長方形・正多角形のみ。開いた線（直線）は補正しない
   const closed = dist(pts[0], pts[pts.length - 1]) < diag * 0.28;
-  if (!closed) {
-    const simp = rdp(pts, diag * 0.05);
-    return simp.length === 2 ? mk(simp, 'line') : null;
-  }
+  if (!closed) return null;
 
   // 楕円としての当てはまり
   const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
@@ -560,16 +558,17 @@ function beautify(s) {
   }
   if (best) {
     const poly = regularize(best);
-    return mk(poly.concat([poly[0]]), 'polygon');
+    if (poly) return mk(poly.concat([poly[0]]), 'polygon');   // 長方形または正多角形になった場合のみ採用
   }
 
-  if (eErr < diag * 0.045) {
-    if (ra / rb > 0.87 && ra / rb < 1.15) ra = rb = (ra + rb) / 2;   // ほぼ真円なら円に
+  // 円としての当てはまり（真円に近いときのみ採用。楕円のまま補正はしない）
+  if (eErr < diag * 0.045 && ra / rb > 0.87 && ra / rb < 1.15) {
+    const r = (ra + rb) / 2;
     const N = 72;
     return mk(Array.from({ length: N + 1 }, (_, i) => {
       const t = i / N * 2 * Math.PI;
-      return { x: cx + ra * Math.cos(t), y: cy + rb * Math.sin(t) };
-    }), 'ellipse');
+      return { x: cx + r * Math.cos(t), y: cy + r * Math.sin(t) };
+    }), 'circle');
   }
   return null;
 }
@@ -588,8 +587,10 @@ canvas.addEventListener('wheel', e => {
   }
 }, { passive: false });
 
-function zoomAt(sx, sy, factor) {
-  const ns = Math.min(8, Math.max(0.1, cam.scale * factor));
+/* 倍率は常に10%刻みにスナップする */
+function applyZoom(sx, sy, targetScale) {
+  const ns = Math.round(Math.min(8, Math.max(0.1, targetScale)) * 10) / 10;
+  if (ns === cam.scale) return;
   const k = ns / cam.scale;
   cam.x = sx - (sx - cam.x) * k;
   cam.y = sy - (sy - cam.y) * k;
@@ -597,6 +598,7 @@ function zoomAt(sx, sy, factor) {
   document.getElementById('zoomLabel').textContent = Math.round(ns * 100) + '%';
   invalidate();
 }
+function zoomAt(sx, sy, factor) { applyZoom(sx, sy, cam.scale * factor); }
 
 /* ---------- 画像の取り込み ---------- */
 function placeImage(img, sx, sy) {
@@ -793,8 +795,8 @@ document.getElementById('clear').onclick = () => {
   if (!items.length) return;
   snapshot(); items = []; selected = null; tainted = false; invalidate();
 };
-document.getElementById('zoomIn').onclick = () => zoomAt(W / 2, H / 2, 1.2);
-document.getElementById('zoomOut').onclick = () => zoomAt(W / 2, H / 2, 1 / 1.2);
+document.getElementById('zoomIn').onclick = () => applyZoom(W / 2, H / 2, cam.scale + 0.1);
+document.getElementById('zoomOut').onclick = () => applyZoom(W / 2, H / 2, cam.scale - 0.1);
 document.getElementById('zoomReset').onclick = () => { cam.x = 0; cam.y = 0; cam.scale = 1; document.getElementById('zoomLabel').textContent = '100%'; invalidate(); };
 
 const hintEl = document.getElementById('hint');
@@ -807,7 +809,7 @@ document.getElementById('help').onclick = () => toast(
   '<b>Shift</b>＋ドラッグで直線（<b>Alt</b>併用で45度スナップ）／画像は <b>Ctrl+V</b> で貼り付け、ブラウザからは直接ドロップ<br>' +
   'ホイールで拡大縮小、<b>Shift</b>＋ホイールでスクロール、<b>Space</b>＋ドラッグで画面移動<br>' +
   'ペンで書き始めると自動でペンに戻ります／ペンの尻尾はそのまま消しゴムになります<br>' +
-  'ツールバー右端のボタンを押すと、丸・三角・四角・多角形を自動できれいな形に補正します（初期状態はオフ）', 8000);
+  'ツールバー右端のボタンを押すと、丸・長方形・正多角形だけを自動できれいな形に補正します（初期状態はオフ）', 8000);
 
 window.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
