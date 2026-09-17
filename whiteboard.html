@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data: blob: https: http:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Whiteboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%234d86f7%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232354cc%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2215%22%20fill%3D%22url(%23g)%22%2F%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M14.1%2044.4L15.5%2042.9L16.7%2041.6L17.8%2040.5L18.8%2039.5L19.7%2038.8L20.6%2038.2L21.4%2037.7L22.2%2037.4L22.9%2037.1L23.5%2037L24.2%2036.8L24.8%2036.7L25.5%2036.6L26.3%2036.6L27%2036.5L27.9%2036.5L28.7%2036.5L29.7%2036.5L30.7%2036.5L31.7%2036.5L32.8%2036.5L33.9%2036.4L35%2036.4L36.2%2036.3L37.4%2036.1L38.6%2035.9L39.9%2035.5L41.1%2035.1L42.3%2034.6L43.5%2033.9L44.7%2033.1L45.7%2032.2L46.8%2031.2L47.7%2030.1L48.6%2028.8L49.4%2027.4L50.1%2025.9L50.8%2024.2L51.5%2022.4L52.1%2020.4L49.9%2019.6L49%2021.3L48.1%2022.8L47.1%2024.1L46.2%2025.2L45.2%2026.1L44.3%2026.8L43.5%2027.3L42.6%2027.7L41.8%2028L41%2028.2L40.2%2028.3L39.4%2028.4L38.6%2028.4L37.8%2028.3L37%2028.2L36.2%2028.1L35.3%2028L34.3%2027.8L33.3%2027.7L32.3%2027.5L31.2%2027.4L30.1%2027.2L29%2027.2L27.8%2027.1L26.5%2027.1L25.3%2027.3L23.9%2027.5L22.6%2027.8L21.3%2028.3L20%2028.9L18.7%2029.7L17.5%2030.6L16.4%2031.7L15.3%2033L14.4%2034.4L13.6%2035.9L13%2037.6L12.4%2039.4L12%2041.4L11.9%2043.6Z%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%2251%22%20cy%3D%2220%22%20r%3D%223.9%22%20fill%3D%22%23f2a93b%22%2F%3E%3C%2Fsvg%3E">
+<style>
+  :root{
+    --bg:#faf9f8;
+    --surface:#ffffff;
+    --line:#e6e3e1;
+    --text:#1b1a19;
+    --muted:#6b6764;
+    --accent:#2f6feb;
+    --shadow:0 8px 24px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.08);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);
+    font-family:"Segoe UI Variable Text","Segoe UI",system-ui,"Yu Gothic UI","Meiryo",sans-serif;
+    color:var(--text);-webkit-user-select:none;user-select:none}
+  canvas{display:block;width:100%;height:100%;touch-action:none;cursor:default}
+  body[data-tool="pen"] canvas{
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 20l4-1 10-10a2.1 2.1 0 0 0-3-3L5 16l-1 4z' fill='%23fff' stroke='%23fff' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M4 20l4-1 10-10a2.1 2.1 0 0 0-3-3L5 16l-1 4z' fill='none' stroke='%231b1a19' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 4 20, crosshair}
+  body[data-tool="eraser"] canvas, body.erasing canvas{
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5.5 16.5l9-9a2 2 0 0 1 3 0l2 2a2 2 0 0 1 0 3l-7 7H8l-2.5-2.5a1.4 1.4 0 0 1 0-2z' fill='%23fff' stroke='%23fff' stroke-width='3.4' stroke-linejoin='round'/%3E%3Cpath d='M5.5 16.5l9-9a2 2 0 0 1 3 0l2 2a2 2 0 0 1 0 3l-7 7H8l-2.5-2.5a1.4 1.4 0 0 1 0-2z' fill='none' stroke='%231b1a19' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 6 19, cell}
+  body[data-tool="pan"] canvas, body.pan canvas{cursor:grab}
+  body.panning canvas{cursor:grabbing}
+
+  .bar{position:fixed;display:flex;align-items:center;gap:4px;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px}
+  #tools{left:50%;bottom:20px;transform:translateX(-50%)}
+  #top{right:16px;top:16px}
+  #zoom{left:16px;bottom:20px;font-variant-numeric:tabular-nums}
+
+  button{appearance:none;background:none;border:0;border-radius:10px;padding:0;
+    width:40px;height:40px;display:grid;place-items:center;color:var(--text);cursor:pointer}
+  button:hover{background:#f0efee}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button[aria-pressed="true"]{background:#e8effc;color:var(--accent)}
+  button:disabled{opacity:.35;cursor:default}
+  button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;
+    stroke-linecap:round;stroke-linejoin:round}
+  .sep{width:1px;height:26px;background:var(--line);margin:0 4px}
+
+  .swatches{display:flex;gap:2px}
+  .sw{width:32px;height:32px;border-radius:50%;border:0;padding:0;position:relative;background:none}
+  .sw i{display:block;width:20px;height:20px;border-radius:50%;background:var(--c);
+    margin:auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);transition:width .12s,height .12s}
+  .sw[aria-pressed="true"] i{width:26px;height:26px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 0 0 2px #fff,0 0 0 4px var(--c)}
+  .sw:hover i{width:24px;height:24px}
+  input[type=color]{width:32px;height:32px;border:0;padding:0;background:none;cursor:pointer}
+
+  .sizes{display:flex;gap:2px}
+  .sz{width:32px;height:32px}
+  .sz i{display:block;border-radius:50%;background:currentColor}
+  .sz[data-w="2"] i{width:5px;height:5px}
+  .sz[data-w="5"] i{width:9px;height:9px}
+  .sz[data-w="12"] i{width:15px;height:15px}
+
+  #zoom button{width:32px;height:32px}
+  #zoomLabel{min-width:52px;text-align:center;font-size:12px;color:var(--muted)}
+
+  #hint{position:fixed;left:50%;top:16px;transform:translateX(-50%);
+    background:rgba(27,26,25,.86);color:#fff;font-size:12.5px;line-height:1.6;
+    padding:10px 14px;border-radius:10px;max-width:min(90vw,620px);pointer-events:none;
+    opacity:0;transition:opacity .25s}
+  #hint.show{opacity:1}
+  kbd{font:inherit;background:rgba(255,255,255,.16);border-radius:4px;padding:1px 5px}
+</style>
+</head>
+<body data-tool="pen">
+<canvas id="c"></canvas>
+
+<div class="bar" id="tools">
+  <button id="t-pen" data-tool="pen" title="ペン (P)" aria-pressed="true">
+    <svg viewBox="0 0 24 24"><path d="M4 20l4-1 10-10a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/></svg></button>
+  <button id="t-eraser" data-tool="eraser" title="消しゴム (E)" aria-pressed="false">
+    <svg viewBox="0 0 24 24"><path d="M8 20h11M5.5 16.5l9-9a2 2 0 0 1 3 0l2 2a2 2 0 0 1 0 3l-7 7H8l-2.5-2.5a1.4 1.4 0 0 1 0-2z"/></svg></button>
+  <button id="t-select" data-tool="select" title="選択 (V)" aria-pressed="false">
+    <svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10 19z"/></svg></button>
+  <button id="t-pan" data-tool="pan" title="移動 (H / Space)" aria-pressed="false">
+    <svg viewBox="0 0 24 24"><path d="M12 4v9M8 7v6M16 7v7M4.5 12v3a6.5 6.5 0 0 0 13 0v-4"/></svg></button>
+  <span class="sep"></span>
+  <div class="swatches" id="swatches"></div>
+  <input type="color" id="custom" value="#1b1a19" title="任意の色">
+  <span class="sep"></span>
+  <div class="sizes" id="sizes">
+    <button class="sz" data-w="2" title="細" aria-pressed="false"><i></i></button>
+    <button class="sz" data-w="5" title="中" aria-pressed="true"><i></i></button>
+    <button class="sz" data-w="12" title="太" aria-pressed="false"><i></i></button>
+  </div>
+  <span class="sep"></span>
+  <button id="shapeAssist" title="図形を自動できれいに補正" aria-pressed="false">
+    <svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="5"/><path d="M13.5 20.5l4.2-7 4.2 7z"/></svg></button>
+</div>
+
+<div class="bar" id="top">
+  <button id="undo" title="元に戻す (Ctrl+Z)" disabled>
+    <svg viewBox="0 0 24 24"><path d="M9 7H5V3M5.5 7A8 8 0 1 1 4 12"/></svg></button>
+  <button id="redo" title="やり直し (Ctrl+Y)" disabled>
+    <svg viewBox="0 0 24 24"><path d="M15 7h4V3M18.5 7A8 8 0 1 0 20 12"/></svg></button>
+  <span class="sep"></span>
+  <button id="save" title="PNGで保存">
+    <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></svg></button>
+  <button id="clear" title="全消去">
+    <svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+  <button id="help" title="使い方">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.5a2.3 2.3 0 1 1 2.9 2.2v1.6"/><circle cx="12.5" cy="16.6" r=".8" fill="currentColor" stroke="none"/></svg></button>
+</div>
+
+<div class="bar" id="zoom">
+  <button id="zoomOut" title="縮小"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></button>
+  <span id="zoomLabel">100%</span>
+  <button id="zoomIn" title="拡大"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></button>
+  <button id="zoomReset" title="等倍に戻す (Ctrl+0)"><svg viewBox="0 0 24 24"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></svg></button>
+</div>
+
+<div id="hint"></div>
+
+<script>
+(() => {
+'use strict';
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let dpr = 1, W = 0, H = 0;
+
+const cam = { x: 0, y: 0, scale: 1 };
+let items = [];            // {type:'stroke'|'image', ...}
+const undoStack = [], redoStack = [];
+
+let tool = 'pen';
+let color = '#1b1a19';
+let penWidth = 5;
+let selected = null;
+let tainted = false;       // CORS画像を読み込んだらtrue（PNG保存不可）
+
+/* ---------- 座標変換 ---------- */
+const toWorld = (sx, sy) => ({ x: (sx - cam.x) / cam.scale, y: (sy - cam.y) / cam.scale });
+
+/* ---------- 描画 ---------- */
+let needsDraw = true;
+const invalidate = () => { needsDraw = true; };
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  W = canvas.clientWidth; H = canvas.clientHeight;
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+  invalidate();
+}
+window.addEventListener('resize', resize);
+
+function strokeBBox(s) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const p of s.points) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
+  const m = s.width;
+  return { x: x0 - m, y: y0 - m, w: x1 - x0 + m * 2, h: y1 - y0 + m * 2 };
+}
+const itemBBox = it => it.type === 'image' ? { x: it.x, y: it.y, w: it.w, h: it.h } : strokeBBox(it);
+
+function drawStroke(g, s) {
+  g.strokeStyle = s.color;
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  const pts = s.points;
+  if (pts.length === 1) {
+    g.fillStyle = s.color;
+    g.beginPath();
+    g.arc(pts[0].x, pts[0].y, s.width * (0.35 + 0.65 * pts[0].p) / 2, 0, Math.PI * 2);
+    g.fill();
+    return;
+  }
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i];
+    g.lineWidth = s.width * (0.35 + 0.65 * (a.p + b.p) / 2);
+    g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+  }
+}
+
+function renderScene(g, view, list, opts = {}) {
+  g.save();
+  g.fillStyle = '#ffffff';
+  g.fillRect(0, 0, opts.w, opts.h);
+  g.translate(view.x, view.y); g.scale(view.scale, view.scale);
+
+  if (opts.grid && view.scale > 0.45) {
+    const step = 28;
+    const x0 = Math.floor(-view.x / view.scale / step) * step;
+    const y0 = Math.floor(-view.y / view.scale / step) * step;
+    const x1 = x0 + opts.w / view.scale + step, y1 = y0 + opts.h / view.scale + step;
+    g.fillStyle = '#dcd8d5';
+    const r = Math.min(1.2, 1.2 / view.scale);
+    for (let x = x0; x < x1; x += step)
+      for (let y = y0; y < y1; y += step) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+  }
+
+  for (const it of list) {
+    if (it.type === 'image') { try { g.drawImage(it.img, it.x, it.y, it.w, it.h); } catch (e) {} }
+    else drawStroke(g, it);
+  }
+
+  if (opts.ui && selected) {
+    const b = itemBBox(selected), s = view.scale;
+    g.strokeStyle = '#2f6feb'; g.lineWidth = 1.5 / s;
+    g.setLineDash([5 / s, 4 / s]);
+    g.strokeRect(b.x, b.y, b.w, b.h);
+    g.setLineDash([]);
+    if (selected.type === 'image') {
+      const hs = 9 / s;
+      g.fillStyle = '#fff';
+      for (const [hx, hy] of corners(b)) {
+        g.beginPath(); g.rect(hx - hs / 2, hy - hs / 2, hs, hs); g.fill(); g.stroke();
+      }
+    }
+  }
+  g.restore();
+}
+const corners = b => [[b.x, b.y], [b.x + b.w, b.y], [b.x, b.y + b.h], [b.x + b.w, b.y + b.h]];
+
+function frame() {
+  if (needsDraw) {
+    needsDraw = false;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const list = live ? items.concat([live]) : items;
+    renderScene(ctx, cam, list, { w: W, h: H, grid: true, ui: true });
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- 履歴 ---------- */
+function snapshot() { undoStack.push(items.slice()); if (undoStack.length > 100) undoStack.shift(); redoStack.length = 0; syncHistory(); }
+function undo() {
+  // 補正直後の1回目は、消すのではなく手描きの線に戻す
+  if (lastBeautified && items[items.length - 1] === lastBeautified.shape) {
+    items = items.slice(0, -1).concat([lastBeautified.raw]);
+    lastBeautified = null; invalidate(); return;
+  }
+  if (!undoStack.length) return;
+  redoStack.push(items.slice()); items = undoStack.pop(); selected = null; syncHistory(); invalidate();
+}
+function redo() { if (!redoStack.length) return; undoStack.push(items.slice()); items = redoStack.pop(); selected = null; syncHistory(); invalidate(); }
+function syncHistory() {
+  document.getElementById('undo').disabled = !undoStack.length;
+  document.getElementById('redo').disabled = !redoStack.length;
+}
+
+/* ---------- 入力 ---------- */
+let live = null;            // 描画中のストローク
+let mode = null;            // 'draw' | 'pan' | 'move' | 'resize' | 'erase'
+let start = null, origin = null, spaceDown = false, resizeHandle = -1;
+
+let autoPenNoticed = false;
+
+const isEraserTip = e => e.pointerType === 'pen' && (e.buttons & 32) !== 0;
+const pressureOf = e => (e.pointerType === 'pen' && e.pressure > 0) ? e.pressure : 0.5;
+
+/* 選択中のオブジェクト（とそのハンドル）の上にいるか */
+function overSelection(w) {
+  if (!selected) return false;
+  const b = itemBBox(selected), tol = 12 / cam.scale;
+  return w.x >= b.x - tol && w.x <= b.x + b.w + tol
+      && w.y >= b.y - tol && w.y <= b.y + b.h + tol;
+}
+
+canvas.addEventListener('pointerdown', e => {
+  try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* 捕捉できなくても描画は続ける */ }
+  const w = toWorld(e.offsetX, e.offsetY);
+  start = { sx: e.offsetX, sy: e.offsetY, ...w };
+  origin = { x: cam.x, y: cam.y };
+
+  // ペン先が触れたら自動でペンに切り替える。
+  // ただし消しゴムを明示的に選んでいるとき、ペンの尻尾、手のひらツール、
+  // 選択中のオブジェクトを掴もうとしているときは切り替えない。
+  if (e.pointerType === 'pen' && !isEraserTip(e)
+      && !['pen', 'eraser', 'pan'].includes(tool)
+      && !overSelection(w)) {
+    setTool('pen');
+    if (!autoPenNoticed) { autoPenNoticed = true; toast('ペンに切り替えました', 1600); }
+  }
+
+  const wantPan = e.button === 1 || spaceDown || tool === 'pan' || e.pointerType === 'touch';
+  if (wantPan) { mode = 'pan'; document.body.classList.add('panning'); return; }
+
+  if (tool === 'eraser' || isEraserTip(e)) {
+    mode = 'erase'; document.body.classList.add('erasing'); eraseAt(w); return;
+  }
+
+  if (tool === 'select') {
+    if (selected && selected.type === 'image') {
+      const b = itemBBox(selected), tol = 12 / cam.scale;
+      resizeHandle = corners(b).findIndex(([hx, hy]) => Math.abs(w.x - hx) < tol && Math.abs(w.y - hy) < tol);
+      if (resizeHandle >= 0) { mode = 'resize'; snapshot(); origin = { ...b }; return; }
+    }
+    const hit = pick(w);
+    selected = hit;
+    if (hit) { mode = 'move'; snapshot(); origin = itemBBox(hit); dragStart = { ...w }; }
+    invalidate();
+    return;
+  }
+
+  mode = 'draw';
+  live = { type: 'stroke', color, width: penWidth, points: [{ x: w.x, y: w.y, p: pressureOf(e) }] };
+  invalidate();
+});
+
+let dragStart = null;
+
+function handleMove(e) {
+  if (!mode) return;
+  // 空配列が返る環境があるので、その場合はイベント自体を使う
+  let evts = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
+  if (!evts.length) evts = [e];
+
+  if (mode === 'pan') {
+    cam.x = origin.x + (e.offsetX - start.sx);
+    cam.y = origin.y + (e.offsetY - start.sy);
+    invalidate(); return;
+  }
+  if (mode === 'erase') { for (const ev of evts) eraseAt(toWorld(ev.offsetX, ev.offsetY)); return; }
+
+  if (mode === 'move') {
+    const w = toWorld(e.offsetX, e.offsetY);
+    const dx = w.x - dragStart.x, dy = w.y - dragStart.y;
+    dragStart = w;
+    if (selected.type === 'image') { selected.x += dx; selected.y += dy; }
+    else for (const p of selected.points) { p.x += dx; p.y += dy; }
+    invalidate(); return;
+  }
+  if (mode === 'resize') {
+    const w = toWorld(e.offsetX, e.offsetY), it = selected;
+    const ratio = origin.w / origin.h;
+    const fixed = corners(origin)[3 - resizeHandle];
+    let nw = Math.abs(w.x - fixed[0]), nh = Math.abs(w.y - fixed[1]);
+    if (nw / nh > ratio) nh = nw / ratio; else nw = nh * ratio;   // 縦横比を保つ
+    nw = Math.max(20, nw); nh = Math.max(20, nh);
+    it.w = nw; it.h = nh;
+    it.x = (w.x < fixed[0]) ? fixed[0] - nw : fixed[0];
+    it.y = (w.y < fixed[1]) ? fixed[1] - nh : fixed[1];
+    invalidate(); return;
+  }
+
+  if (mode === 'draw') {
+    if (e.shiftKey) {
+      // Shift: 始点から現在位置までの直線に置き換える（Altでさらに45度スナップ）
+      let ex = toWorld(e.offsetX, e.offsetY).x, ey = toWorld(e.offsetX, e.offsetY).y;
+      if (e.altKey) {
+        const dx = ex - start.x, dy = ey - start.y;
+        const a = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
+        const len = Math.hypot(dx, dy);
+        ex = start.x + Math.cos(a) * len; ey = start.y + Math.sin(a) * len;
+      }
+      const p = Math.max(...live.points.map(q => q.p), pressureOf(e));
+      live.points = [{ x: start.x, y: start.y, p }, { x: ex, y: ey, p }];
+      live.straight = true;
+    } else {
+      if (live.straight) { live.points = live.points.slice(0, 1); live.straight = false; }
+      for (const ev of evts) {
+        const w = toWorld(ev.offsetX, ev.offsetY);
+        const last = live.points[live.points.length - 1];
+        if (Math.hypot(w.x - last.x, w.y - last.y) * cam.scale < 0.6) continue;
+        live.points.push({ x: w.x, y: w.y, p: pressureOf(ev) });
+      }
+    }
+    invalidate();
+  }
+}
+
+if ('onpointerrawupdate' in window) canvas.addEventListener('pointerrawupdate', handleMove);
+else canvas.addEventListener('pointermove', handleMove);
+
+function endPointer() {
+  if (mode === 'draw' && live) {
+    snapshot();
+    let out = live;
+    if (shapeAssist && !live.straight) {
+      const s = beautify(live);
+      if (s) {
+        out = s; lastBeautified = { shape: s, raw: live };
+        if (!shapeNoticed) { shapeNoticed = true; toast('図形に補正しました（<b>Ctrl+Z</b> で手描きの線に戻せます）', 3000); }
+      }
+    }
+    items.push(out);
+  }
+  live = null; mode = null; resizeHandle = -1;
+  document.body.classList.remove('panning', 'erasing');
+  invalidate();
+}
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', endPointer);
+
+/* ヒットテスト（最前面優先） */
+function pick(w) {
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    if (it.type === 'image') {
+      if (w.x >= it.x && w.x <= it.x + it.w && w.y >= it.y && w.y <= it.y + it.h) return it;
+    } else if (nearStroke(it, w, Math.max(it.width, 8))) return it;
+  }
+  return null;
+}
+function nearStroke(s, w, tol) {
+  const pts = s.points;
+  for (let i = 1; i < pts.length; i++) if (distSeg(w, pts[i - 1], pts[i]) < tol) return true;
+  return pts.length === 1 && Math.hypot(pts[0].x - w.x, pts[0].y - w.y) < tol;
+}
+function distSeg(p, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy;
+  let t = l2 ? ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2 : 0;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+let erasedThisStroke = false;
+function eraseAt(w) {
+  const tol = 10 / cam.scale;
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    const hit = it.type === 'image'
+      ? (w.x >= it.x && w.x <= it.x + it.w && w.y >= it.y && w.y <= it.y + it.h)
+      : nearStroke(it, w, Math.max(it.width / 2, tol));
+    if (hit) {
+      if (!erasedThisStroke) { snapshot(); erasedThisStroke = true; }
+      items.splice(i, 1); if (selected === it) selected = null;
+      invalidate(); break;
+    }
+  }
+}
+canvas.addEventListener('pointerup', () => { erasedThisStroke = false; });
+
+/* ---------- 図形の自動補正 ---------- */
+let shapeAssist = false;     // 起動時はオフ。ツールバー右端のボタンで切り替える
+let lastBeautified = null;   // 直後のCtrl+Zで手描きの線に戻すため
+let shapeNoticed = false;
+
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+const cv = a => { const m = mean(a); return Math.sqrt(mean(a.map(v => (v - m) ** 2))) / m; };
+const pathLen = p => p.reduce((s, q, i) => i ? s + dist(p[i - 1], q) : 0, 0);
+
+/* Ramer-Douglas-Peucker：折れ線を代表点まで間引く */
+function rdp(pts, eps) {
+  if (pts.length < 3) return pts.slice();
+  const a = pts[0], b = pts[pts.length - 1];
+  let idx = 0, max = 0;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const d = distSeg(pts[i], a, b);
+    if (d > max) { max = d; idx = i; }
+  }
+  if (max > eps) return rdp(pts.slice(0, idx + 1), eps).slice(0, -1).concat(rdp(pts.slice(idx), eps));
+  return [a, b];
+}
+
+function centroid(p) {
+  return { x: mean(p.map(q => q.x)), y: mean(p.map(q => q.y)) };
+}
+function signedArea(p) {
+  let s = 0;
+  for (let i = 0; i < p.length; i++) { const q = p[(i + 1) % p.length]; s += p[i].x * q.y - q.x * p[i].y; }
+  return s / 2;
+}
+/* 各点から多角形の辺までの平均距離 */
+function polyError(pts, poly) {
+  let s = 0;
+  for (const q of pts) {
+    let d = Infinity;
+    for (let i = 0; i < poly.length; i++) d = Math.min(d, distSeg(q, poly[i], poly[(i + 1) % poly.length]));
+    s += d;
+  }
+  return s / pts.length;
+}
+
+/* RDPが拾いすぎた頂点（近すぎる点・ほぼ一直線の点）を落とす */
+function cleanCorners(poly, diag) {
+  let p = poly.slice();
+  for (let pass = 0; pass < 4 && p.length > 3; pass++) {
+    let changed = false;
+    for (let i = 0; i < p.length && p.length > 3; i++) {
+      const prev = p[(i - 1 + p.length) % p.length], cur = p[i], next = p[(i + 1) % p.length];
+      const near = dist(cur, next) < diag * 0.07;
+      const v1 = { x: prev.x - cur.x, y: prev.y - cur.y }, v2 = { x: next.x - cur.x, y: next.y - cur.y };
+      const cos = (v1.x * v2.x + v1.y * v2.y) / (Math.hypot(v1.x, v1.y) * Math.hypot(v2.x, v2.y) || 1);
+      const flat = cos < -0.978;                 // 内角が約168度より大きい＝角ではない
+      if (near || flat) { p.splice(i, 1); i--; changed = true; }
+    }
+    if (!changed) break;
+  }
+  return p;
+}
+
+/* 4隅が軸に揃っていれば長方形に整える */
+function tryRect(poly) {
+  for (let i = 0; i < 4; i++) {
+    const a = poly[i], b = poly[(i + 1) % 4];
+    let ang = Math.abs(Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI) % 90;
+    if (Math.min(ang, 90 - ang) > 11) return null;
+  }
+  const xs = poly.map(p => p.x), ys = poly.map(p => p.y);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  return [{ x: x0, y: y0 }, { x: x1, y: y0 }, { x: x1, y: y1 }, { x: x0, y: y1 }];
+}
+
+/* 正多角形に近ければ完全な正多角形にする */
+function regularize(poly) {
+  const n = poly.length;
+  if (n === 4) { const r = tryRect(poly); if (r) return r; }
+  const c = centroid(poly);
+  const rs = poly.map(p => dist(p, c));
+  const edges = poly.map((p, i) => dist(p, poly[(i + 1) % n]));
+  const edgeTol = n === 4 ? 0.12 : 0.28;         // 長方形を正方形にしないため4角形は厳しめ
+  if (cv(rs) < 0.2 && cv(edges) < edgeTol) {
+    const dir = signedArea(poly) >= 0 ? 1 : -1;
+    let sx = 0, sy = 0;                          // 回転角は単位ベクトルの平均で求める
+    poly.forEach((p, i) => {
+      const a = Math.atan2(p.y - c.y, p.x - c.x) - dir * 2 * Math.PI * i / n;
+      sx += Math.cos(a); sy += Math.sin(a);
+    });
+    const a0 = Math.atan2(sy, sx), R = mean(rs);
+    return Array.from({ length: n }, (_, i) => {
+      const a = a0 + dir * 2 * Math.PI * i / n;
+      return { x: c.x + R * Math.cos(a), y: c.y + R * Math.sin(a) };
+    });
+  }
+  return poly;
+}
+
+function beautify(s) {
+  const pts = s.points;
+  if (pts.length < 8) return null;
+  const b = strokeBBox(s), diag = Math.hypot(b.w, b.h);
+  if (diag < 56) return null;                    // 小さい線は手書き文字とみなして触らない
+  if (pathLen(pts) < diag * 0.8) return null;
+
+  const p = mean(pts.map(q => q.p));
+  const mk = (points, shape) => ({
+    type: 'stroke', color: s.color, width: s.width, shape,
+    points: points.map(q => ({ x: q.x, y: q.y, p }))
+  });
+
+  const closed = dist(pts[0], pts[pts.length - 1]) < diag * 0.28;
+  if (!closed) {
+    const simp = rdp(pts, diag * 0.05);
+    return simp.length === 2 ? mk(simp, 'line') : null;
+  }
+
+  // 楕円としての当てはまり
+  const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+  let ra = b.w / 2, rb = b.h / 2;
+  const eErr = mean(pts.map(q => Math.abs(Math.hypot((q.x - cx) / ra, (q.y - cy) / rb) - 1) * (ra + rb) / 2));
+
+  // 多角形としての当てはまり。粒度を変えて何通りか試し、
+  // 誤差が十分小さいものの中で最も頂点が少ないものを採る
+  const polyTol = diag * 0.02;
+  let best = null;
+  for (const k of [0.03, 0.045, 0.06, 0.08, 0.1, 0.12]) {
+    let c = rdp(pts, diag * k);
+    if (c.length > 3 && dist(c[0], c[c.length - 1]) < diag * 0.15) c = c.slice(0, -1);
+    c = cleanCorners(c, diag);
+    if (c.length < 3 || c.length > 6) continue;   // 7角形以上は手描きだと楕円と区別できない
+    const err = polyError(pts, c);
+    if (err < polyTol && (!best || c.length < best.length)) best = c;
+  }
+  if (best) {
+    const poly = regularize(best);
+    return mk(poly.concat([poly[0]]), 'polygon');
+  }
+
+  if (eErr < diag * 0.045) {
+    if (ra / rb > 0.87 && ra / rb < 1.15) ra = rb = (ra + rb) / 2;   // ほぼ真円なら円に
+    const N = 72;
+    return mk(Array.from({ length: N + 1 }, (_, i) => {
+      const t = i / N * 2 * Math.PI;
+      return { x: cx + ra * Math.cos(t), y: cy + rb * Math.sin(t) };
+    }), 'ellipse');
+  }
+  return null;
+}
+
+/* ---------- ズーム / パン ---------- */
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  // デバイスによって deltaMode が違う（0=px, 1=行, 2=ページ）ので揃える
+  const k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? H : 1;
+  const dx = e.deltaX * k, dy = e.deltaY * k;
+
+  if (e.shiftKey) {                      // Shift＋ホイール＝スクロール
+    cam.x -= dx; cam.y -= dy; invalidate();
+  } else {                               // ホイール＝拡大縮小（カーソル位置を中心に）
+    zoomAt(e.offsetX, e.offsetY, Math.exp(-dy * 0.0022));
+  }
+}, { passive: false });
+
+function zoomAt(sx, sy, factor) {
+  const ns = Math.min(8, Math.max(0.1, cam.scale * factor));
+  const k = ns / cam.scale;
+  cam.x = sx - (sx - cam.x) * k;
+  cam.y = sy - (sy - cam.y) * k;
+  cam.scale = ns;
+  document.getElementById('zoomLabel').textContent = Math.round(ns * 100) + '%';
+  invalidate();
+}
+
+/* ---------- 画像の取り込み ---------- */
+function placeImage(img, sx, sy) {
+  const max = Math.min(W, H) * 0.6 / cam.scale;
+  let w = img.naturalWidth, h = img.naturalHeight;
+  const k = Math.min(1, max / Math.max(w, h));
+  w *= k; h *= k;
+  const c = toWorld(sx ?? W / 2, sy ?? H / 2);
+  snapshot();
+  const it = { type: 'image', img, x: c.x - w / 2, y: c.y - h / 2, w, h };
+  items.push(it);
+  selected = it; setTool('select');
+  invalidate();
+}
+
+function loadBlob(blob, sx, sy) {
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => placeImage(img, sx, sy);
+  img.src = url;
+}
+
+function loadURL(url, sx, sy) {
+  // Electron ではメインプロセス経由で取得する（canvas が汚染されず PNG 保存できる）
+  if (window.api && window.api.fetchImage) {
+    window.api.fetchImage(url).then(dataURL => {
+      if (dataURL) {
+        const img = new Image();
+        img.onload = () => placeImage(img, sx, sy);
+        img.onerror = () => loadURLDirect(url, sx, sy);
+        img.src = dataURL;
+      } else loadURLDirect(url, sx, sy);
+    }).catch(() => loadURLDirect(url, sx, sy));
+    return;
+  }
+  loadURLDirect(url, sx, sy);
+}
+
+function loadURLDirect(url, sx, sy) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';                 // まずCORSつきで試す
+  img.onload = () => placeImage(img, sx, sy);
+  img.onerror = () => {                          // 失敗したらCORSなしで（PNG保存は不可になる）
+    const img2 = new Image();
+    img2.onload = () => { tainted = true; placeImage(img2, sx, sy); };
+    img2.onerror = () => toast('画像を読み込めませんでした：' + url);
+    img2.src = url;
+  };
+  img.src = url;
+}
+
+/* クリップボード貼り付け */
+window.addEventListener('paste', e => {
+  const dt = e.clipboardData; if (!dt) return;
+  for (const item of dt.items) {
+    if (item.type.startsWith('image/')) { e.preventDefault(); loadBlob(item.getAsFile()); return; }
+  }
+  const text = dt.getData('text/plain');
+  if (text && /^https?:\/\/\S+\.(png|jpe?g|gif|webp|bmp|svg)(\?\S*)?$/i.test(text.trim())) {
+    e.preventDefault(); loadURL(text.trim());
+  }
+});
+
+/* ドラッグ&ドロップ（ファイル / ブラウザからの画像） */
+['dragenter', 'dragover'].forEach(t => window.addEventListener(t, e => {
+  e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+}));
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  const dt = e.dataTransfer, sx = e.clientX, sy = e.clientY;
+  const file = [...(dt.files || [])].find(f => f.type.startsWith('image/'));
+  if (file) return loadBlob(file, sx, sy);
+
+  const html = dt.getData('text/html');
+  if (html) {
+    const m = html.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
+    if (m) return loadURL(m[1], sx, sy);
+  }
+  const uri = dt.getData('text/uri-list') || dt.getData('text/plain');
+  if (uri) return loadURL(uri.split('\n')[0].trim(), sx, sy);
+});
+
+/* ---------- 保存 ---------- */
+function savePNG() {
+  if (!items.length) return toast('保存する内容がありません');
+  if (tainted) return toast('外部サイトの画像を含むため保存できません。画像をコピーして貼り付け直してください');
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const it of items) {
+    const b = itemBBox(it);
+    x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+    x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+  }
+  const pad = 32, s = 2;
+  const w = (x1 - x0 + pad * 2), h = (y1 - y0 + pad * 2);
+  const off = document.createElement('canvas');
+  off.width = Math.round(w * s); off.height = Math.round(h * s);
+  const g = off.getContext('2d');
+  g.setTransform(s, 0, 0, s, 0, 0);
+  const keep = selected; selected = null;
+  renderScene(g, { x: -x0 + pad, y: -y0 + pad, scale: 1 }, items, { w, h, grid: false, ui: false });
+  selected = keep;
+  try {
+    off.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'whiteboard-' + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '') + '.png';
+      a.click();
+    });
+  } catch (err) { toast('保存できませんでした（外部画像の制約）'); }
+}
+
+/* ---------- UI ---------- */
+const PALETTE = ['#1b1a19', '#e5484d', '#2f6feb', '#2ea043', '#f2a93b', '#8b5cf6'];
+const swWrap = document.getElementById('swatches');
+PALETTE.forEach((c, i) => {
+  const b = document.createElement('button');
+  b.className = 'sw'; b.style.setProperty('--c', c); b.title = c;
+  b.setAttribute('aria-pressed', String(i === 0));
+  b.innerHTML = '<i></i>';
+  b.onclick = () => setColor(c, b);
+  swWrap.appendChild(b);
+});
+function setColor(c, btn) {
+  color = c;
+  swWrap.querySelectorAll('.sw').forEach(s => s.setAttribute('aria-pressed', String(s === btn)));
+  if (selected && selected.type === 'stroke') { snapshot(); selected.color = c; invalidate(); }
+  if (tool === 'eraser') setTool('pen');
+}
+document.getElementById('custom').oninput = e => setColor(e.target.value, null);
+
+document.querySelectorAll('#tools [data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+function setTool(t) {
+  tool = t; selected = t === 'select' ? selected : null;
+  document.querySelectorAll('#tools [data-tool]').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.tool === t)));
+  document.body.dataset.tool = t;
+  invalidate();
+}
+document.querySelectorAll('#sizes .sz').forEach(b => b.onclick = () => {
+  penWidth = +b.dataset.w;
+  document.querySelectorAll('#sizes .sz').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+});
+
+document.getElementById('shapeAssist').onclick = e => {
+  shapeAssist = !shapeAssist;
+  e.currentTarget.setAttribute('aria-pressed', String(shapeAssist));
+  toast(shapeAssist ? '図形の自動補正：オン' : '図形の自動補正：オフ', 1400);
+};
+
+document.getElementById('undo').onclick = undo;
+document.getElementById('redo').onclick = redo;
+document.getElementById('save').onclick = savePNG;
+document.getElementById('clear').onclick = () => {
+  if (!items.length) return;
+  snapshot(); items = []; selected = null; tainted = false; invalidate();
+};
+document.getElementById('zoomIn').onclick = () => zoomAt(W / 2, H / 2, 1.2);
+document.getElementById('zoomOut').onclick = () => zoomAt(W / 2, H / 2, 1 / 1.2);
+document.getElementById('zoomReset').onclick = () => { cam.x = 0; cam.y = 0; cam.scale = 1; document.getElementById('zoomLabel').textContent = '100%'; invalidate(); };
+
+const hintEl = document.getElementById('hint');
+let hintTimer = null;
+function toast(msg, ms = 3200) {
+  hintEl.innerHTML = msg; hintEl.classList.add('show');
+  clearTimeout(hintTimer); hintTimer = setTimeout(() => hintEl.classList.remove('show'), ms);
+}
+document.getElementById('help').onclick = () => toast(
+  '<b>Shift</b>＋ドラッグで直線（<b>Alt</b>併用で45度スナップ）／画像は <b>Ctrl+V</b> で貼り付け、ブラウザからは直接ドロップ<br>' +
+  'ホイールで拡大縮小、<b>Shift</b>＋ホイールでスクロール、<b>Space</b>＋ドラッグで画面移動<br>' +
+  'ペンで書き始めると自動でペンに戻ります／ペンの尻尾はそのまま消しゴムになります<br>' +
+  'ツールバー右端のボタンを押すと、丸・三角・四角・多角形を自動できれいな形に補正します（初期状態はオフ）', 8000);
+
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { spaceDown = true; document.body.classList.add('pan'); }
+  const ctrl = e.ctrlKey || e.metaKey;
+  if (ctrl && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+  else if (ctrl && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
+  else if (ctrl && e.key === '0') { e.preventDefault(); document.getElementById('zoomReset').click(); }
+  else if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); savePNG(); }
+  else if (!ctrl && (e.key === 'Delete' || e.key === 'Backspace') && selected) {
+    snapshot(); items = items.filter(i => i !== selected); selected = null; invalidate();
+  }
+  else if (!ctrl && 'pP'.includes(e.key)) setTool('pen');
+  else if (!ctrl && 'eE'.includes(e.key)) setTool('eraser');
+  else if (!ctrl && 'vV'.includes(e.key)) setTool('select');
+  else if (!ctrl && 'hH'.includes(e.key)) setTool('pan');
+});
+window.addEventListener('keyup', e => {
+  if (e.code === 'Space') { spaceDown = false; document.body.classList.remove('pan'); }
+});
+window.addEventListener('contextmenu', e => e.preventDefault());
+
+resize();
+requestAnimationFrame(frame);
+setTimeout(() => document.getElementById('help').click(), 600);
+})();
+</script>
+</body>
+</html>

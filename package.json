@@ -1,0 +1,39 @@
+{
+  "name": "whiteboard",
+  "version": "1.0.0",
+  "description": "オンライン個別指導用ホワイトボード",
+  "main": "main.js",
+  "author": "Yuto",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis portable",
+    "dist:portable": "electron-builder --win portable",
+    "dist:dir": "electron-builder --win dir"
+  },
+  "devDependencies": {
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "jp.yuto.whiteboard",
+    "productName": "Whiteboard",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "whiteboard.html", "icon.ico"],
+    "win": {
+      "icon": "icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "ホワイトボード"
+    },
+    "portable": { "artifactName": "Whiteboard-portable-${version}.exe" },
+    "compression": "maximum"
+  }
+}
