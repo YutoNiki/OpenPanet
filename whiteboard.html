@@ -69,6 +69,17 @@
     opacity:0;transition:opacity .25s}
   #hint.show{opacity:1}
   kbd{font:inherit;background:rgba(255,255,255,.16);border-radius:4px;padding:1px 5px}
+
+  #consent{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+    background:rgba(27,26,25,.55);padding:16px}
+  #consent .box{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+    max-width:420px;padding:24px;user-select:text}
+  #consent h2{margin:0 0 12px;font-size:16px}
+  #consent ul{margin:0 0 20px;padding-left:1.2em;font-size:13px;line-height:1.7;color:var(--text)}
+  #consent li{margin-bottom:6px}
+  #consent button{width:auto;height:auto;padding:10px 22px;border-radius:10px;
+    background:var(--accent);color:#fff;font-size:13px;font-weight:600;display:block;margin-left:auto}
+  #consent button:hover{background:#2457c9}
 </style>
 </head>
 <body data-tool="pen">
@@ -121,6 +132,18 @@
 
 <div id="hint"></div>
 <div id="eraserCursor"></div>
+
+<div id="consent">
+  <div class="box">
+    <h2>ご利用にあたって</h2>
+    <ul>
+      <li>作成した内容は自動保存されません。残したい場合は右下の「PNGで保存」から書き出してください。</li>
+      <li>画像を貼り付ける際は、著作権・肖像権など第三者の権利を侵害しないようご注意ください。</li>
+      <li>入力した内容や画像が外部サーバーへ送信・収集されることはありません（すべてこの端末内で完結します）。</li>
+    </ul>
+    <button id="consentAgree">同意して始める</button>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -756,6 +779,7 @@ function loadURLDirect(url, sx, sy) {
 
 /* クリップボード貼り付け */
 window.addEventListener('paste', e => {
+  if (awaitingConsent) return;
   const dt = e.clipboardData; if (!dt) return;
   for (const item of dt.items) {
     if (item.type.startsWith('image/')) { e.preventDefault(); loadBlob(item.getAsFile()); return; }
@@ -772,6 +796,7 @@ window.addEventListener('paste', e => {
 }));
 window.addEventListener('drop', e => {
   e.preventDefault();
+  if (awaitingConsent) return;
   const dt = e.dataTransfer, sx = e.clientX, sy = e.clientY;
   const file = [...(dt.files || [])].find(f => f.type.startsWith('image/'));
   if (file) return loadBlob(file, sx, sy);
@@ -918,7 +943,7 @@ document.getElementById('help').onclick = () => toast(
   '<b>Ctrl+Z</b>/<b>Y</b>：戻す/やり直し／<b>Delete</b>：削除／<b>Ctrl+S</b>：保存', 8000);
 
 window.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') return;
+  if (e.target.tagName === 'INPUT' || awaitingConsent) return;
   if (e.code === 'Space') { spaceDown = true; document.body.classList.add('pan'); }
   const ctrl = e.ctrlKey || e.metaKey;
   if (ctrl && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
@@ -943,7 +968,26 @@ window.addEventListener('contextmenu', e => e.preventDefault());
 
 resize();
 requestAnimationFrame(frame);
-setTimeout(() => document.getElementById('help').click(), 600);
+
+/* ---------- 初回起動時の同意ポップアップ ---------- */
+const CONSENT_KEY = 'wb-consent-v1';
+let awaitingConsent = true;
+try { awaitingConsent = !localStorage.getItem(CONSENT_KEY); } catch (e) { awaitingConsent = false; }
+const consentEl = document.getElementById('consent');
+function dismissConsent() {
+  awaitingConsent = false;
+  consentEl.remove();
+  setTimeout(() => document.getElementById('help').click(), 400);
+}
+if (awaitingConsent) {
+  document.getElementById('consentAgree').onclick = () => {
+    try { localStorage.setItem(CONSENT_KEY, '1'); } catch (e) { /* プライベートモード等では保存されないだけ */ }
+    dismissConsent();
+  };
+} else {
+  consentEl.remove();
+  setTimeout(() => document.getElementById('help').click(), 600);
+}
 })();
 </script>
 </body>

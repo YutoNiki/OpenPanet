@@ -1,6 +1,8 @@
-# オンライン個別指導用ホワイトボード
+# ホワイトボード
 
 `whiteboard.html` は単体で動きます。まず Edge / Chrome にドラッグして操作感を確かめてください。
+
+更新履歴は [CHANGELOG.md](CHANGELOG.md) を参照してください。
 
 ## Wacom ペンタブの設定（最重要）
 
@@ -142,5 +144,5 @@ preload で `contextBridge.exposeInMainWorld('api', { fetchImage: url => ipcRend
 
 - ページ（ボード）切り替え、ボードの保存・復元（JSON で items をシリアライズ。画像は data URL 化）
 - 図形ツール（四角・丸・矢印）、テキストボックス
-- レーザーポインタ（一定時間で消える軌跡）— 説明中に指し示す用途で効きます
-- 生徒側とのリアルタイム同期（Yjs + WebSocket など）
+- レーザーポインタ（一定時間で消える軌跡）— 画面共有中に指し示す用途で効きます
+- 複数人でのリアルタイム共同編集（Yjs + WebSocket など）

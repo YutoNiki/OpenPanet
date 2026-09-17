@@ -1,7 +1,7 @@
 {
   "name": "whiteboard",
-  "version": "1.0.0",
-  "description": "オンライン個別指導用ホワイトボード",
+  "version": "1.1.0",
+  "description": "手書き・画像貼り付けに対応したシンプルなホワイトボードアプリ",
   "main": "main.js",
   "author": "Yuto",
   "license": "MIT",
