@@ -12,8 +12,8 @@ This produces two files in `dist`:
 
 | File | What it is |
 |---|---|
-| `LibreWhiteboard Setup 1.2.0.exe` | Installer. Lets you pick the install location and language (English/Japanese), and creates a desktop shortcut |
-| `LibreWhiteboard-portable-1.2.0.exe` | Standalone portable build — copy it to a USB drive and run it on any PC |
+| `OpenPanet Setup 1.2.0.exe` | Installer. Lets you pick the install location and language (English/Japanese), and creates a desktop shortcut |
+| `OpenPanet-portable-1.2.0.exe` | Standalone portable build — copy it to a USB drive and run it on any PC |
 
 Both are around 90MB, since Electron bundles the whole of Chromium.
 

@@ -1,5 +1,5 @@
 {
-  "name": "librewhiteboard",
+  "name": "openpanet",
   "version": "1.2.0",
   "description": "A simple, open-source whiteboard app with pressure-sensitive pen input and image pasting",
   "main": "main.js",
@@ -16,8 +16,8 @@
     "electron-builder": "^26.15.3"
   },
   "build": {
-    "appId": "jp.yuto.librewhiteboard",
-    "productName": "LibreWhiteboard",
+    "appId": "jp.yuto.openpanet",
+    "productName": "OpenPanet",
     "directories": { "output": "dist" },
     "files": ["main.js", "preload.js", "whiteboard.html", "icon.ico"],
     "win": {
@@ -31,12 +31,12 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "LibreWhiteboard",
+      "shortcutName": "OpenPanet",
       "displayLanguageSelector": true,
       "installerLanguages": ["en_US", "ja_JP"],
       "language": "1033"
     },
-    "portable": { "artifactName": "LibreWhiteboard-portable-${version}.exe" },
+    "portable": { "artifactName": "OpenPanet-portable-${version}.exe" },
     "compression": "maximum"
   }
 }

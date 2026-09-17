@@ -28,7 +28,7 @@ function createWindow() {
     minHeight: 600,
     backgroundColor: '#faf9f8',
     icon: path.join(__dirname, 'icon.ico'),
-    title: 'LibreWhiteboard',
+    title: 'OpenPanet',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

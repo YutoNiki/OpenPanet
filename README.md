@@ -1,4 +1,6 @@
-# LibreWhiteboard
+# OpenPanet
+
+A free, open-source whiteboard app, started as a response to Microsoft Whiteboard's retirement. The name blends "Pane" (a window pane) with the sound of "paint".
 
 `whiteboard.html` runs standalone — drag it into Edge/Chrome first to try it out.
 

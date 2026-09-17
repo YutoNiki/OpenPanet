@@ -2,7 +2,7 @@
 
 ## 1.2.0
 
-- Renamed the project to **LibreWhiteboard**
+- Renamed the project to **OpenPanet**
 - Translated README, the build notes, and this changelog to English
 - The installer now lets you choose English or Japanese during setup
 - The app's UI (tooltips, popups, the first-run notice) now follows that choice, falling back to the OS/browser language when run outside the installer (portable build or standalone HTML)
